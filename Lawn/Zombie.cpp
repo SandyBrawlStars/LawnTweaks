@@ -692,7 +692,8 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
         aBodyReanim->mFrameBasePose = 0;
         TodScaleRotateTransformMatrix(aAttachEffect->mOffset, 37.0f, 0.0f, 0.2f, -0.8f, 0.8f);
 
-        mHelmType = HelmType::HELMTYPE_WALLNUT;
+        /*LawnTweaks - tallnut zombie fix*/
+        mHelmType = HelmType::HELMTYPE_TALLNUT;
         mHelmHealth = 2200;
         mVariant = false;
         mPosX += 30.0f;
@@ -838,9 +839,9 @@ void Zombie::SetupDoorArms(Reanimation* aReanim, bool theShow)
     aReanim->AssignRenderGroupToPrefix("Zombie_outerarm_lower", aArmGroup);
     aReanim->AssignRenderGroupToPrefix("Zombie_outerarm_upper", aArmGroup);
     aReanim->AssignRenderGroupToPrefix("anim_innerarm", aArmGroup);
-    aReanim->AssignRenderGroupToPrefix("Zombie_outerarm_screendoor", aDoorGroup);
+    aReanim->AssignRenderGroupToPrefix("Zombie_outerarm_screendoor", RENDER_GROUP_OVER_SHIELD);
     aReanim->AssignRenderGroupToPrefix("Zombie_innerarm_screendoor", aDoorGroup);
-    aReanim->AssignRenderGroupToPrefix("Zombie_innerarm_screendoor_hand", aDoorGroup);
+    aReanim->AssignRenderGroupToPrefix("Zombie_innerarm_screendoor_hand", RENDER_GROUP_OVER_SHIELD);
 }
 
 void Zombie::SetupReanimLayers(Reanimation* aReanim, ZombieType theZombieType)
@@ -6601,6 +6602,7 @@ void Zombie::CheckIfPreyCaught()
         mZombiePhase == ZombiePhase::PHASE_SNORKEL_INTO_POOL || 
         mZombiePhase == ZombiePhase::PHASE_SNORKEL_WALKING || 
         mZombiePhase == ZombiePhase::PHASE_LADDER_PLACING || 
+        mZombiePhase == ZombiePhase::PHASE_JACK_IN_THE_BOX_POPPING || /*LawnTweaks - Fixed exploding jack-in-the-box eating*/
         mZombieHeight == ZombieHeight::HEIGHT_GETTING_BUNGEE_DROPPED || 
         mZombieHeight == ZombieHeight::HEIGHT_UP_LADDER || 
         mZombieHeight == ZombieHeight::HEIGHT_IN_TO_POOL || 
@@ -9066,7 +9068,8 @@ bool Zombie::HasShadow()
         mZombiePhase == ZombiePhase::PHASE_BOBSLED_BOARDING ||
         mZombiePhase == ZombiePhase::PHASE_POLEVAULTER_IN_VAULT ||
         mZombiePhase == ZombiePhase::PHASE_DOLPHIN_INTO_POOL ||
-        mZombiePhase == ZombiePhase::PHASE_SNORKEL_INTO_POOL)
+        mZombiePhase == ZombiePhase::PHASE_SNORKEL_INTO_POOL||
+        mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZOMBIQUARIUM) /*LawnTweaks - removed zombiequarium shadow*/
         return false;
 
     if (mZombieType == ZombieType::ZOMBIE_ZAMBONI ||

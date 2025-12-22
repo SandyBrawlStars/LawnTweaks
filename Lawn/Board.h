@@ -227,6 +227,9 @@ public:
 	bool							mCoinFaded;
 	int								mAchievementCoinCount;
 	int								mGargantuarsKilled;
+	int                             mDebugObjectSelection;
+	int                             mDebugObjectType;
+	int                             mDebugObjectLimit;
 
 public:
 	Board(LawnApp* theApp);
@@ -485,11 +488,26 @@ public:
 	int								CountZombieByType(ZombieType theZombieType);
 	static /*inline*/ bool			IsZombieTypeSpawnedOnly(ZombieType theZombieType);
 	void							DrawHealthbar(Graphics* g, Rect rect, Color maxColor, int maxNumber, Color baseColor, int baseNumber, int barWidth, int barHeight, int barOffsetX, int barOffsetY, Color textColor, Font* textFont, int textOffsetY, Color textOutlineColor, int textOutlineOffset, bool drawBarOutline);
+
+	/*LawnTweaks - new board functions
+	LoadBackgroundDebug - PickBackground but with a paramter instead of picking by itself
+	DrawHealthbarMini - new healthbar drawing function*/
+	void        LoadBackgroundDebug(BackgroundType theBackground);
+	void		DrawHealthbarMini(Graphics* g, Rect rect, Color maxColor, int maxNumber, Color baseColor, int baseNumber, int barWidth, int barHeight, int barOffsetX, int barOffsetY, Color textColor, Font* textFont, int textOffsetY, Color textOutlineColor, int textOutlineOffset, bool drawBarOutline);
 };
 extern bool gShownMoreSunTutorial;
 
 int									GetRectOverlap(const Rect& rect1, const Rect& rect2);
 bool								GetCircleRectOverlap(int theCircleX, int theCircleY, int theRadius, const Rect& theRect);
 /*inline*/ void						BoardInitForPlayer();
+
+/*LawnTweaks - For debug mode strings*/
+class BackgroundDefinition
+{
+public:
+	BackgroundType                      mBackgroundType; // background identifier
+	const SexyChar* mBackgroundName; // background name
+};
+extern BackgroundDefinition gBackgroundDefs[NUM_ADVENTURE_BACKGROUNDS];
 
 #endif // __BOARD_H__

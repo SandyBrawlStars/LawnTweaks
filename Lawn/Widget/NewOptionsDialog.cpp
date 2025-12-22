@@ -61,6 +61,9 @@ NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector, bo
     mDebugModeBox = MakeNewCheckbox(-1, this, mApp->mTodCheatKeys);
     mDebugModeBox->SetVisible(false);
 
+    mExtraBarsBox = MakeNewCheckbox(-1, this, mApp->mExtraBars);
+    mExtraBarsBox->SetVisible(false); /*LawnTweaks - Extra hud checkbox*/
+
     mDiscordBox = MakeNewCheckbox(-1, this, mApp->mDiscordPresence);
     mDiscordBox->SetVisible(false);
 
@@ -78,7 +81,7 @@ NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector, bo
 
     mZombieHealthbarsBox = MakeNewCheckbox(-1, this, mApp->mZombieHealthbars);
     mZombieHealthbarsBox->SetVisible(false);
-    
+
 
     mPlantHealthbarsBox = MakeNewCheckbox(-1, this, mApp->mPlantHealthbars);
     mPlantHealthbarsBox->SetVisible(false);
@@ -186,6 +189,7 @@ NewOptionsDialog::~NewOptionsDialog()
     delete mAutoCollectCoinsBox;
     delete mZombieHealthbarsBox;
     delete mRealHardwareAccelerationCheckbox;
+    delete mExtraBarsBox;
 }
 
 int NewOptionsDialog::GetPreferredHeight(int theWidth)
@@ -218,6 +222,7 @@ void NewOptionsDialog::AddedToManager(Sexy::WidgetManager* theWidgetManager)
     AddWidget(mZombieHealthbarsBox);
     AddWidget(mPlantHealthbarsBox);
     AddWidget(mRealHardwareAccelerationCheckbox);
+    AddWidget(mExtraBarsBox);
 }
 
 void NewOptionsDialog::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
@@ -245,6 +250,7 @@ void NewOptionsDialog::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
     RemoveWidget(mZombieHealthbarsBox);
     RemoveWidget(mPlantHealthbarsBox);
     RemoveWidget(mRealHardwareAccelerationCheckbox);
+    RemoveWidget(mExtraBarsBox);
 }
 
 void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
@@ -269,9 +275,11 @@ void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
     mBackToGameButton->Resize(30, 381, mBackToGameButton->mWidth, mBackToGameButton->mHeight);
     mLeftPageButton->Resize(100, ADVANCED_PAGE_Y - 25, IMAGE_QUICKPLAY_LEFT_BUTTON->mWidth, IMAGE_QUICKPLAY_LEFT_BUTTON->mHeight);
     mRightPageButton->Resize(280, ADVANCED_PAGE_Y - 25, IMAGE_QUICKPLAY_RIGHT_BUTTON->mWidth, IMAGE_QUICKPLAY_RIGHT_BUTTON->mHeight);
-    mSpeedEditWidget->Resize(ADVANCED_SPEED_X + 9, ADVANCED_SPEED_Y - 4, IMAGE_OPTIONS_CHECKBOX0->mWidth, IMAGE_OPTIONS_CHECKBOX0->mHeight + 4);
+    /*LawnTweaks - shovel keybind is removed and extra hud and speed multiplier switch places*/
+    mSpeedEditWidget->Resize(ADVANCED_SPEED_X + 9, mBankKeybindsBox->mY + 73, IMAGE_OPTIONS_CHECKBOX0->mWidth, IMAGE_OPTIONS_CHECKBOX0->mHeight + 4);
     mGameAdvancedButton->Resize(mWidth - Sexy::IMAGE_BUTTON_SMALL->mWidth - 9, mRestartButton->mY, Sexy::IMAGE_BUTTON_SMALL->mWidth, Sexy::IMAGE_BUTTON_SMALL->mHeight);
     mRealHardwareAccelerationCheckbox->Resize(310, 148, 46, 45);
+    mExtraBarsBox->Resize(284, 148, 46, 45);
 
     if ((!mRestartButton->mVisible || !mAlmanacButton->mVisible) && !mFromGameSelector && !mAdvancedMode)
     {
@@ -339,16 +347,16 @@ void NewOptionsDialog::Draw(Sexy::Graphics* g)
             TodDrawString(g, _S("Discord Presence"), mDiscordBox->mX - 6, mDiscordBox->mY + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
             TodDrawString(g, _S("Seed Bank Keybinds"), mBankKeybindsBox->mX - 6, mBankKeybindsBox->mY + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
             TodDrawString(g, StrFormat(_S("Keybind: '%s'"), m09FormatBox->mChecked ? "1-0" : "0-9"), m09FormatBox->mX - 6, m09FormatBox->mY + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
-            TodDrawString(g, _S("Shovel Keybind: 'S'"), mWidth / 2, m09FormatBox->mY + 55, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_CENTER);
+            TodDrawString(g, _S("Speed Multiplier"), m09FormatBox->mX - 6, m09FormatBox->mX + 44, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
+            g->DrawImage(Sexy::IMAGE_OPTIONS_CHECKBOX0, ADVANCED_SPEED_X, m09FormatBox->mX + 22); /*LawnTweaks - speed mult added here, removed in page 2*/
         }
         else if (mAdvancedPage == 2)
         {
-            TodDrawString(g, _S("Speed Multiplier"), ADVANCED_SPEED_X - 6, ADVANCED_SPEED_Y + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
+            TodDrawString(g, _S("Extra HUD"), mAutoCollectSunsBox->mX - 6, mExtraBarsBox->mY + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
             TodDrawString(g, _S("Auto-Collect Suns"), mAutoCollectSunsBox->mX - 6, mAutoCollectSunsBox->mY + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
             TodDrawString(g, _S("Auto-Collect Coins"), mAutoCollectCoinsBox->mX - 6, mAutoCollectCoinsBox->mY + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
             TodDrawString(g, _S("Zombie Healthbars"), mZombieHealthbarsBox->mX - 6, mZombieHealthbarsBox->mY + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
             TodDrawString(g, _S("Plant Healthbars"), mPlantHealthbarsBox->mX - 6, mPlantHealthbarsBox->mY + 22, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
-            g->DrawImage(Sexy::IMAGE_OPTIONS_CHECKBOX0, ADVANCED_SPEED_X, ADVANCED_SPEED_Y);
         }
         else if (mAdvancedPage == 3)
         {
@@ -480,26 +488,28 @@ void NewOptionsDialog::UpdateAdvancedPage()
     mAutoCollectCoinsBox->SetVisible(false);
     mZombieHealthbarsBox->SetVisible(false);
     mPlantHealthbarsBox->SetVisible(false);
+    mExtraBarsBox->SetVisible(false);
     mRealHardwareAccelerationCheckbox->SetVisible(false);
 
     switch (mAdvancedPage)
     {
-        case 1:
-            mDebugModeBox->SetVisible(true);
-            mDiscordBox->SetVisible(true);
-            mBankKeybindsBox->SetVisible(true);
-            m09FormatBox->SetVisible(true);
-            break;
-        case 2:
-            mSpeedEditWidget->SetVisible(true);
-            mAutoCollectSunsBox->SetVisible(true);
-            mAutoCollectCoinsBox->SetVisible(true);
-            mZombieHealthbarsBox->SetVisible(true);
-            mPlantHealthbarsBox->SetVisible(true);
-            break;
-        case 3:
-            mRealHardwareAccelerationCheckbox->SetVisible(true);
-            break;
+    case 1:
+        mDebugModeBox->SetVisible(true);
+        mDiscordBox->SetVisible(true);
+        mBankKeybindsBox->SetVisible(true);
+        m09FormatBox->SetVisible(true);
+        mSpeedEditWidget->SetVisible(true);
+        break;
+    case 2:
+        mExtraBarsBox->SetVisible(true);
+        mAutoCollectSunsBox->SetVisible(true);
+        mAutoCollectCoinsBox->SetVisible(true);
+        mZombieHealthbarsBox->SetVisible(true);
+        mPlantHealthbarsBox->SetVisible(true);
+        break;
+    case 3:
+        mRealHardwareAccelerationCheckbox->SetVisible(true);
+        break;
         break;
     }
 }

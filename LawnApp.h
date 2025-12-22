@@ -76,7 +76,7 @@ public:
 	std::string						mRegisterLink;									
 	std::string						mMod;											
 	bool							mRegisterResourcesLoaded;						
-	bool							mTodCheatKeys;									
+	bool							mTodCheatKeys;		
 	GameMode						mGameMode;										
 	GameScenes						mGameScene;										
 	bool							mLoadingZombiesThreadCompleted;					
@@ -139,6 +139,9 @@ public:
 	time_t							mStartTime;
 	SexyString                      mDetails;
 	SexyString                      mState;
+
+	/*LawnTweaks - mExtraBars - for extra hud mode*/
+	bool					        mExtraBars;
 
 public:
 	LawnApp();

@@ -39,6 +39,17 @@
 
 bool gShownMoreSunTutorial = false;
 
+/*LawnTweaks - more debug mode stuff*/
+BackgroundDefinition gBackgroundDefs[NUM_ADVENTURE_BACKGROUNDS] = {
+
+	{BACKGROUND_1_DAY,  _S("DAY")},
+	{BACKGROUND_2_NIGHT,  _S("NIGHT")},
+	{BACKGROUND_3_POOL,  _S("POOL")},
+	{BACKGROUND_4_FOG,  _S("FOG")},
+	{BACKGROUND_5_ROOF,  _S("ROOF")},
+	{BACKGROUND_6_BOSS,  _S("NIGHT_ROOF")},
+};
+
 Board::Board(LawnApp* theApp)
 {
 	mApp = theApp;
@@ -162,6 +173,8 @@ Board::Board(LawnApp* theApp)
 	mMenuButton->mDrawStoneButton = true;
 	mFastButton = new GameButton(2);
 	mFastButton->Resize(740, 30, IMAGE_FASTBUTTON->mWidth, 46);
+	mFastButton->mButtonImage = IMAGE_FASTBUTTON;
+	/*LawnTweaks - Frame perfect speed button crash fix*/
 	mStoreButton = nullptr;
 	mIgnoreMouseUp = false;
 	mPeashootersUsed = false;
@@ -172,6 +185,9 @@ Board::Board(LawnApp* theApp)
 	mCoinFaded = false;
 	mAchievementCoinCount = 0;
 	mGargantuarsKilled = 0;
+	mDebugObjectSelection = 0;
+	mDebugObjectType = 0;
+	mDebugObjectLimit = 0;
 
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
 	{
@@ -6424,20 +6440,62 @@ void Board::DrawGameObjects(Graphics* g)
 			Color maxColor = Color(255, 0, 0);
 			Color textColor = Color::White;
 			bool drawBarOutline = true;
+			textColor = Color(255, 255, 255, 200);
+			maxColor.mAlpha = 200;
+			/*LawnTweaks - Colors changed to be lighter + transparent healthbars*/
 			if (aZombie->mBodyHealth > 0)
 			{
 				barOffsetY += baseBarOffsetY;
-				DrawHealthbar(g, rect, maxColor, aZombie->mBodyMaxHealth, Color(255, 255, 0), aZombie->mBodyHealth, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color::Black, textOutlineOffset, drawBarOutline);
+				DrawHealthbarMini(g, rect, maxColor, aZombie->mBodyMaxHealth, Color(255, 255, 0, 200), aZombie->mBodyHealth, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
 			}
 			if (aZombie->mHelmHealth > 0)
 			{
-				barOffsetY += baseBarOffsetY + barHeight + textOffsetY + baseTextOffsetY;
-				DrawHealthbar(g, rect, maxColor, aZombie->mHelmMaxHealth, Color(0, 0, 255), aZombie->mHelmHealth, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color::Black, textOutlineOffset, drawBarOutline);
+				barOffsetY += baseBarOffsetY + barHeight;
+				DrawHealthbarMini(g, rect, maxColor, aZombie->mHelmMaxHealth, Color(0, 160, 255, 200), aZombie->mHelmHealth, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
 			}
 			if (aZombie->mShieldHealth > 0)
 			{
-				barOffsetY += baseBarOffsetY + barHeight + textOffsetY + baseTextOffsetY;
-				DrawHealthbar(g, rect, maxColor, aZombie->mShieldMaxHealth, Color(0, 255, 255), aZombie->mShieldHealth, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color::Black, textOutlineOffset, drawBarOutline);
+				barOffsetY += baseBarOffsetY + barHeight;
+				DrawHealthbarMini(g, rect, maxColor, aZombie->mShieldMaxHealth, Color(0, 255, 255, 200), aZombie->mShieldHealth, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+			}
+			if (mApp->mExtraBars)
+			{
+				/*LawnTweaks - extra bars for status effects*/
+				if (aZombie->mIceTrapCounter > 0)
+				{
+					barOffsetY += baseBarOffsetY + barHeight;
+					DrawHealthbarMini(g, rect, maxColor, 600, Color(75, 75, 255, 200), aZombie->mIceTrapCounter, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
+				else if (aZombie->mButteredCounter > 0)
+				{
+					barOffsetY += baseBarOffsetY + barHeight;
+					DrawHealthbarMini(g, rect, maxColor, 400, Color(237, 250, 60, 200), aZombie->mButteredCounter, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
+				else if (aZombie->mChilledCounter > 0)
+				{
+					barOffsetY += baseBarOffsetY + barHeight;
+					DrawHealthbarMini(g, rect, maxColor, 2000, Color(90, 90, 255, 200), aZombie->mChilledCounter, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
+				/*LawnTweaks - Counter bar, setting base and max values for each zombie with a counter*/
+				int zombieMaxCounter = -1;
+				int zombieCounter = -1;
+				switch (aZombie->mZombieType)
+				{
+				case ZOMBIE_YETI: zombieMaxCounter = 2000; zombieCounter = aZombie->mPhaseCounter;  break;
+				case ZOMBIE_BUNGEE: zombieMaxCounter = 300;  zombieCounter = aZombie->mPhaseCounter; break;
+				case ZOMBIE_CATAPULT: zombieMaxCounter = 300;  zombieCounter = aZombie->mPhaseCounter; break;
+				case ZOMBIE_JACK_IN_THE_BOX: zombieMaxCounter = 2300;  zombieCounter = aZombie->mPhaseCounter; break;
+				case ZOMBIE_BOBSLED: zombieMaxCounter = 500;  zombieCounter = aZombie->mPhaseCounter; break;
+				case ZOMBIE_DANCER: zombieMaxCounter = 310;  zombieCounter = aZombie->mPhaseCounter; break;
+				case ZOMBIE_PEA_HEAD: zombieMaxCounter = 150;  zombieCounter = aZombie->mPhaseCounter; break;
+				case ZOMBIE_JALAPENO_HEAD: zombieMaxCounter = 4000;  zombieCounter = aZombie->mPhaseCounter; break;
+				case ZOMBIE_GATLING_HEAD: zombieMaxCounter = 150;  zombieCounter = aZombie->mPhaseCounter; break;
+				}
+				if (zombieMaxCounter > -1 && zombieCounter > 0 && aZombie->IsOnBoard() && aZombie->mZombiePhase != ZombiePhase::PHASE_ZOMBIE_BURNED)
+				{
+					barOffsetY += baseBarOffsetY + barHeight;
+					DrawHealthbarMini(g, rect, maxColor, zombieMaxCounter, Color(142, 63, 252, 200), ClampInt(zombieCounter, 0, 99999), barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
 			}
 			break;
 		}
@@ -6485,12 +6543,52 @@ void Board::DrawGameObjects(Graphics* g)
 			}
 			Color textColor = Color::White;
 			bool drawBarOutline = true;
-			if (aPlant->mPlantHealth > 0)
+			textColor = Color(255, 255, 255, 200);
+			baseColor.mAlpha = 200;
+			maxColor.mAlpha = 200;
+			/*LawnTweaks - Setting healthbar to be transparent and making counters for each plant*/
+			int plantMaxCounter = -1;
+			int plantCounter = -1;
+			if (aPlant->mSubclass == SUBCLASS_SHOOTER || aPlant->MakesSun() || aPlant->mSeedType == SEED_MARIGOLD)
+			{
+				plantMaxCounter = aPlant->mLaunchRate; plantCounter = aPlant->mLaunchCounter;
+			}
+			switch (aPlant->mSeedType)
+			{
+			case SEED_CHERRYBOMB: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_POTATOMINE: plantMaxCounter = 1500; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_CHOMPER: plantMaxCounter = 2700; plantCounter = aPlant->mStateCountdown;	break;
+			case SEED_GRAVEBUSTER: plantMaxCounter = 400; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_ICESHROOM: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_DOOMSHROOM: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_SQUASH: plantMaxCounter = 80; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_TANGLEKELP: plantMaxCounter = 100; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_JALAPENO: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_SPIKEWEED: plantMaxCounter = 100; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_BLOVER: plantMaxCounter = 50; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_MAGNETSHROOM: plantMaxCounter = 1500; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_INSTANT_COFFEE: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_SPIKEROCK: plantMaxCounter = 100; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_GOLD_MAGNET: plantMaxCounter = 300; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_COBCANNON: plantMaxCounter = 3000; plantCounter = aPlant->mStateCountdown;  break;
+			}
+			if (aPlant->mPlantHealth > -1)
 			{
 				barOffsetY += baseBarOffsetY;
 				if (isPumpkin)
-					barOffsetY += barHeight + textOffsetY + baseTextOffsetY;
-				DrawHealthbar(g, rect, maxColor, aPlant->mPlantMaxHealth, baseColor, aPlant->mPlantHealth, barWidth, barHeight, (aPlant->mSeedType != SeedType::SEED_IMITATER && isPumpkin) || aPlant->mSeedType == SeedType::SEED_TALLNUT ? 10 : 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color::Black, textOutlineOffset, drawBarOutline);
+				{
+					barOffsetY += barHeight + baseBarOffsetY;
+				}
+				DrawHealthbarMini(g, rect, maxColor, aPlant->mPlantMaxHealth, baseColor, aPlant->mPlantHealth, barWidth, barHeight, (aPlant->mSeedType != SeedType::SEED_IMITATER && isPumpkin) || aPlant->mSeedType == SeedType::SEED_TALLNUT ? 10 : 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+			}
+			if (mApp->mExtraBars)
+			{
+				/*LawnTweaks - Drawing counter bar*/
+				if (plantMaxCounter > -1 && plantCounter > 0)
+				{
+					barOffsetY += baseBarOffsetY + barHeight;
+					DrawHealthbarMini(g, rect, maxColor, plantMaxCounter, Color(142, 63, 252, 200), ClampInt(plantCounter, 0, 99999), barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
 			}
 			break;
 		}
@@ -7711,10 +7809,11 @@ void Board::KeyChar(SexyChar theChar)
 	bool canUseKeybinds = mApp->mBankKeybinds && (!mPaused || mApp->mGameScene == GameScenes::SCENE_PLAYING || mApp->mCrazyDaveReanimID != ReanimationID::REANIMATIONID_NULL);
 	if (isdigit(theChar) && canUseKeybinds && mSeedBank->mY >= 0)
 	{
-		for (int i = 0; i < mSeedBank->mNumPackets; i++)
+		/*LawnTweaks - changed statements to feature = to include last seed packet*/
+		for (int i = 0; i <= mSeedBank->mNumPackets; i++)
 		{
 			int aSeedIndex = i;
-			if (theChar == '0' + aSeedIndex && mSeedBank->mNumPackets > aSeedIndex)
+			if (theChar == '0' + aSeedIndex && mSeedBank->mNumPackets >= aSeedIndex)
 			{
 				if (mApp->mZeroNineBankFormat)
 				{
@@ -8121,63 +8220,34 @@ void Board::KeyChar(SexyChar theChar)
 	Zombie* aBossZombie = GetBossZombie();
 	if (aBossZombie && !aBossZombie->IsDeadOrDying())
 	{
-		if (theChar == _S('b'))
+		if (theChar == _S('B'))
 		{
 			aBossZombie->mBossBungeeCounter = 0;
 			return;
 		}
-		if (theChar == _S('u'))
+		if (theChar == _S('U'))
 		{
 			aBossZombie->mSummonCounter = 0;
 			return;
 		}
-		if (theChar == _S('s'))
+		if (theChar == _S('S'))
 		{
 			aBossZombie->mBossStompCounter = 0;
 			return;
 		}
-		if (theChar == _S('r'))
+		if (theChar == _S('R'))
 		{
 			aBossZombie->BossRVAttack();
 			return;
 		}
-		if (theChar == _S('h'))
+		if (theChar == _S('H'))
 		{
 			aBossZombie->mBossHeadCounter = 0;
 			return;
 		}
-		if (theChar == _S('d'))
+		if (theChar == _S('D'))
 		{
 			aBossZombie->TakeDamage(10000, 0U);
-			return;
-		}
-	}
-
-	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_WAR_AND_PEAS || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_WAR_AND_PEAS_2)
-	{
-		if (theChar == _S('w'))
-		{
-			AddZombie(ZombieType::ZOMBIE_WALLNUT_HEAD, Zombie::ZOMBIE_WAVE_DEBUG);
-			return;
-		}
-		if (theChar == _S('t'))
-		{
-			AddZombie(ZombieType::ZOMBIE_TALLNUT_HEAD, Zombie::ZOMBIE_WAVE_DEBUG);
-			return;
-		}
-		if (theChar == _S('j'))
-		{
-			AddZombie(ZombieType::ZOMBIE_JALAPENO_HEAD, Zombie::ZOMBIE_WAVE_DEBUG);
-			return;
-		}
-		if (theChar == _S('g'))
-		{
-			AddZombie(ZombieType::ZOMBIE_GATLING_HEAD, Zombie::ZOMBIE_WAVE_DEBUG);
-			return;
-		}
-		if (theChar == _S('s'))
-		{
-			AddZombie(ZombieType::ZOMBIE_SQUASH_HEAD, Zombie::ZOMBIE_WAVE_DEBUG);
 			return;
 		}
 	}
@@ -8312,162 +8382,265 @@ void Board::KeyChar(SexyChar theChar)
 		}
 		return;
 	}
-
-	if (theChar == _S('b'))
-	{
-		AddZombie(ZombieType::ZOMBIE_BUNGEE, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('o'))
-	{
-		AddZombie(ZombieType::ZOMBIE_FOOTBALL, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('s'))
-	{
-		AddZombie(ZombieType::ZOMBIE_DOOR, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('L'))
-	{
-		AddZombie(ZombieType::ZOMBIE_LADDER, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('y'))
-	{
-		AddZombie(ZombieType::ZOMBIE_YETI, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('a'))
-	{
-		AddZombie(ZombieType::ZOMBIE_FLAG, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('w'))
-	{
-		AddZombie(ZombieType::ZOMBIE_NEWSPAPER, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('F'))
-	{
-		AddZombie(ZombieType::ZOMBIE_BALLOON, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('n'))
-	{
-		if (StageHasPool())
-		{
-			AddZombie(ZombieType::ZOMBIE_SNORKEL, Zombie::ZOMBIE_WAVE_DEBUG);
-		}
-	}
-	if (theChar == _S('c'))
-	{
-		AddZombie(ZombieType::ZOMBIE_TRAFFIC_CONE, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('m'))
-	{
-		AddZombie(ZombieType::ZOMBIE_DANCER, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('h'))
-	{
-		AddZombie(ZombieType::ZOMBIE_PAIL, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	//if (theChar == _S('H')
-	//{
-	//	AddZombie(ZombieType::ZOMBIE_PAIL, Zombie::ZOMBIE_WAVE_DEBUG);
-	//	AddZombie(ZombieType::ZOMBIE_PAIL, Zombie::ZOMBIE_WAVE_DEBUG);
-	//	AddZombie(ZombieType::ZOMBIE_PAIL, Zombie::ZOMBIE_WAVE_DEBUG);
-	//	AddZombie(ZombieType::ZOMBIE_PAIL, Zombie::ZOMBIE_WAVE_DEBUG);
-	//	AddZombie(ZombieType::ZOMBIE_PAIL, Zombie::ZOMBIE_WAVE_DEBUG);
-	//	return;
-	//}
-	if (theChar == _S('D'))
-	{
-		AddZombie(ZombieType::ZOMBIE_DIGGER, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('p'))
-	{
-		AddZombie(ZombieType::ZOMBIE_POLEVAULTER, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('P'))
-	{
-		AddZombie(ZombieType::ZOMBIE_POGO, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('R'))
-	{
-		if (StageHasPool())
-		{
-			AddZombie(ZombieType::ZOMBIE_DOLPHIN_RIDER, Zombie::ZOMBIE_WAVE_DEBUG);
-		}
-		return;
-	}
-	else if(theChar == _S('j'))
-	{
-		AddZombie(ZombieType::ZOMBIE_JACK_IN_THE_BOX, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('g'))
-	{
-		AddZombie(ZombieType::ZOMBIE_GARGANTUAR, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('G'))
-	{
-		AddZombie(ZombieType::ZOMBIE_REDEYE_GARGANTUAR, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('i'))
-	{
-		AddZombie(ZombieType::ZOMBIE_ZAMBONI, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('C'))
-	{
-		AddZombie(ZombieType::ZOMBIE_CATAPULT, Zombie::ZOMBIE_WAVE_DEBUG);
-		return;
-	}
-	if (theChar == _S('1'))
-	{
-		Plant* aPlant = GetTopPlantAt(0, 0, PlantPriority::TOPPLANT_ANY);
-		if (aPlant)
-		{
-			aPlant->Die();
-			mChallenge->ZombieAtePlant(nullptr, aPlant);
-			return;
-		}
-	}
 	if (theChar == _S('B'))
 	{
 		mFogBlownCountDown = 2200;
 		return;
 	}
-	if (theChar == _S('t'))
-	{
-		if (!CanAddBobSled())
-		{
-			int aRow = Rand(5);
-			int aPos = 400;
-			if (StageHasPool())
-			{
-				aRow = Rand(2);
-			}
-			else if (StageHasRoof())
-			{
-				aPos = 500;
-			}
-			mIceTimer[aRow] = 3000;
-			mIceMinX[aRow] = aPos;
-		}
 
-		AddZombie(ZombieType::ZOMBIE_BOBSLED, Zombie::ZOMBIE_WAVE_DEBUG);
+	/*LawnTweaks - Debug+*/
+	/*LawnTweaks - Limits for selection*/
+	if (mDebugObjectType == 0)
+	{
+		mDebugObjectLimit = NUM_ZOMBIE_TYPES - 1;
+	}
+	if (mDebugObjectType == 1)
+	{
+		mDebugObjectLimit = NUM_SEED_TYPES - 1;
+	}
+	if (mDebugObjectType == 2)
+	{
+		mDebugObjectLimit = NUM_COIN_TYPES - 1;
+	}
+	if (mDebugObjectType == 3)
+	{
+		mDebugObjectLimit = NUM_PROJECTILES - 1;
+	}
+	if (mDebugObjectType == 4)
+	{
+		mDebugObjectLimit = BACKGROUND_6_BOSS;
+	}
+	if (mDebugObjectType == 5)
+	{
+		mDebugObjectLimit = NUM_ZOMBIE_TYPES - 1;
+	}
+	if (mDebugObjectType == 6)
+	{
+		mDebugObjectLimit = NUM_GRID_ITEM_TYPES - 1;
+	}
+
+	/*LawnTweaks - Tracking mouse position*/
+	int aMouseX = mApp->mWidgetManager->mLastMouseX - mX;
+	int aMouseY = mApp->mWidgetManager->mLastMouseY - mY;
+	int aGridX = PixelToGridXKeepOnBoard(aMouseX, aMouseY);
+	int aGridY = PixelToGridYKeepOnBoard(aMouseX, aMouseY);
+
+	/*LawnTweaks - Selecting objects*/
+	if (theChar == _S('d'))
+	{
+		mDebugObjectSelection++;
+
+		if (mDebugObjectSelection > mDebugObjectLimit)
+		{
+			mDebugObjectSelection = 0;
+		}
+		if (mDebugObjectSelection < 0)
+		{
+			mDebugObjectSelection = mDebugObjectLimit;
+		}
+		if (mDebugObjectType == 0)
+		{
+			string aName = gZombieDefs[mDebugObjectSelection].mZombieName;
+			DisplayAdvice("Selected Zombie Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 1)
+		{
+			string aName = gPlantDefs[mDebugObjectSelection].mPlantName;
+			DisplayAdvice("Selected Plant Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 2)
+		{
+			string aName = gCoinDefs[mDebugObjectSelection].mCoinName;
+			DisplayAdvice("Selected Coin Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 3)
+		{
+			string aName = gProjectileDefinition[mDebugObjectSelection].mProjectileName;
+			DisplayAdvice("Selected Projectile Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 4)
+		{
+			string aName = gBackgroundDefs[mDebugObjectSelection].mBackgroundName;
+			DisplayAdvice("Selected Background Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 5)
+		{
+			string aName = gZombieDefs[mDebugObjectSelection].mZombieName;
+			DisplayAdvice("Selected Hypno Zombie Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 6)
+		{
+			string aName = gGridItemDefs[mDebugObjectSelection].mItemName;
+			DisplayAdvice("Selected Grid Item Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
 		return;
 	}
+
+
+	if (theChar == _S('a'))
+	{
+		mDebugObjectSelection--;
+		if (mDebugObjectSelection < 0)
+		{
+			mDebugObjectSelection = mDebugObjectLimit;
+		}
+		if (mDebugObjectSelection > mDebugObjectLimit)
+		{
+			mDebugObjectSelection = 0;
+		}
+		if (mDebugObjectType == 0)
+		{
+			string aName = gZombieDefs[mDebugObjectSelection].mZombieName;
+			DisplayAdvice("Selected Zombie Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 1)
+		{
+			string aName = gPlantDefs[mDebugObjectSelection].mPlantName;
+			DisplayAdvice("Selected Plant Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 2)
+		{
+			string aName = gCoinDefs[mDebugObjectSelection].mCoinName;
+			DisplayAdvice("Selected Coin Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 3)
+		{
+			string aName = gProjectileDefinition[mDebugObjectSelection].mProjectileName;
+			DisplayAdvice("Selected Projectile Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 4)
+		{
+			string aName = gBackgroundDefs[mDebugObjectSelection].mBackgroundName;
+			DisplayAdvice("Selected Background Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 5)
+		{
+			string aName = gZombieDefs[mDebugObjectSelection].mZombieName;
+			DisplayAdvice("Selected Hypno Zombie Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		else if (mDebugObjectType == 6)
+		{
+			string aName = gGridItemDefs[mDebugObjectSelection].mItemName;
+			DisplayAdvice("Selected Grid Item Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		}
+		return;
+	}
+
+	/*LawnTweaks - Selecting object types*/
+	if (theChar == _S('s'))
+	{
+		mDebugObjectType++;
+		if (mDebugObjectType > 6)
+		{
+			mDebugObjectType = 0;
+		}
+		string aName = mDebugObjectType == 0 ? "Zombie" : mDebugObjectType == 1 ? "Plant" : mDebugObjectType == 2 ? "Coin" : mDebugObjectType == 3 ? "Projectile" : mDebugObjectType == 4 ? "Background" : mDebugObjectType == 5 ? "Hypno Zombie" : mDebugObjectType == 6 ? "Grid Item" : "Nothing";
+		DisplayAdvice("Selected Object Type " + aName, MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+		return;
+	}
+
+	/*LawnTweaks - Creating objects*/
+	if (theChar == _S('w'))
+	{
+		if (mDebugObjectType == 0)
+		{
+			ZombieType aDebugZombieType = static_cast<ZombieType>(mDebugObjectSelection);
+			Zombie* aZombie = AddZombieInRow(aDebugZombieType, aGridY, Zombie::ZOMBIE_WAVE_DEBUG);
+			return;
+
+		}
+		if (mDebugObjectType == 1)
+		{
+			SeedType aImitaterType = SeedType::SEED_NONE;
+			SeedType aDebugPlantType = static_cast<SeedType>(mDebugObjectSelection);
+			if (aDebugPlantType == SeedType::SEED_IMITATER)
+			{
+				aImitaterType = static_cast<SeedType>(RandRangeInt(0, NUM_SEED_TYPES - 1));
+			}
+			AddPlant(aGridX, aGridY, aDebugPlantType, aImitaterType);
+			return;
+		}
+		if (mDebugObjectType == 2)
+		{
+			CoinType aDebugCoinType = static_cast<CoinType>(mDebugObjectSelection);
+			Coin* aCoin = AddCoin(aMouseX, aMouseY - 70, aDebugCoinType, CoinMotion::COIN_MOTION_COIN);
+			if (aDebugCoinType == CoinType::COIN_USABLE_SEED_PACKET)
+			{
+				aCoin->mUsableSeedType = (SeedType)RandRangeInt(0, 47);
+			}
+			return;
+		}
+		if (mDebugObjectType == 3)
+		{
+			ProjectileType aDebugProjType = static_cast<ProjectileType>(mDebugObjectSelection);
+			Projectile* aProjectile = AddProjectile(aMouseX, aMouseY, RenderLayer::RENDER_LAYER_PLANT, aGridY, aDebugProjType);
+			aProjectile->mDamageRangeFlags = 1;
+			aProjectile->mMotionType = ProjectileMotion::MOTION_STRAIGHT;
+			if (aProjectile->mProjectileType == ProjectileType::PROJECTILE_FIREBALL)
+			{
+				aProjectile->ConvertToFireball(aGridX);
+			}
+			return;
+		}
+		if (mDebugObjectType == 4)
+		{
+			BackgroundType aDebugBackgroundType = static_cast<BackgroundType>(mDebugObjectSelection);
+			LoadBackgroundDebug(aDebugBackgroundType);
+			return;
+		}
+		if (mDebugObjectType == 5)
+		{
+
+			ZombieType aDebugZombieType = static_cast<ZombieType>(mDebugObjectSelection);
+			Zombie* aZombie = AddZombieInRow(aDebugZombieType, aGridY, Zombie::ZOMBIE_WAVE_DEBUG);
+			aZombie->mPosX = aMouseX;
+			aZombie->StartMindControlled();
+			return;
+
+		}
+		if (mDebugObjectType == 6)
+		{
+			GridItemType aDebugItemType = static_cast<GridItemType>(mDebugObjectSelection);
+			GridItem* aGraveStone = mGridItems.DataArrayAlloc();
+			aGraveStone->mGridItemType = aDebugItemType;
+			aGraveStone->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_PLANT, aGridY, 800);
+			aGraveStone->mGridItemCounter = -Rand(50);
+			aGraveStone->mGridX = aGridX;
+			aGraveStone->mGridY = aGridY;
+			if (aGraveStone->mGridItemType == GridItemType::GRIDITEM_LADDER)
+			{
+				aGraveStone->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_PLANT, aGridY, 800);
+			}
+			if (aGraveStone->mGridItemType == GridItemType::GRIDITEM_CRATER)
+			{
+				aGraveStone->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_GROUND, aGridY, 1);
+				aGraveStone->mGridItemCounter = 18000;
+			}
+			if (aGraveStone->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE || aGraveStone->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE)
+			{
+				aGraveStone->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_PARTICLE, aGridY, 0);
+				aGraveStone->OpenPortal();
+			}
+			if (aGraveStone->mGridItemType == GridItemType::GRIDITEM_GRAVESTONE)
+			{
+				aGraveStone->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_GRAVE_STONE, aGridY, 3);
+				aGraveStone->AddGraveStoneParticles();
+			}
+			if (aGraveStone->mGridItemType == GridItemType::GRIDITEM_SCARY_POT)
+			{
+				aGraveStone->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_PLANT, aGridY, 800);
+				aGraveStone->mScaryPotType = static_cast<ScaryPotType>(RandRangeInt(ScaryPotType::SCARYPOT_SEED, ScaryPotType::SCARYPOT_SUN));
+				aGraveStone->mSeedType = static_cast<SeedType>(RandRangeInt(0, NUM_SEED_TYPES - 1));
+				aGraveStone->mZombieType = static_cast<ZombieType>(RandRangeInt(0, NUM_ZOMBIE_TYPES - 1));
+				aGraveStone->mGridItemState = GridItemState::GRIDITEM_STATE_SCARY_POT_ZOMBIE;
+				aGraveStone->mSunCount = 5;
+			}
+			return;
+
+		}
+		return;
+	}
+	/*LawnTweaks - removed old zombie debugging code since it was mid*/
 	if (theChar == _S('r'))
 	{
 		SpawnZombiesFromGraves();
@@ -8524,6 +8697,96 @@ void Board::KeyChar(SexyChar theChar)
 			mZombieCountDown = 6;
 		}
 	}
+}
+
+/*LawnTweaks - just the background picking function but with a paramater instead of picking based on 
+level, meant for debug*/
+void Board::LoadBackgroundDebug(BackgroundType theBackground)
+{
+	mBackground = theBackground;
+	LoadBackgroundImages();
+
+	if (mBackground == BackgroundType::BACKGROUND_1_DAY || mBackground == BackgroundType::BACKGROUND_GREENHOUSE || mBackground == BackgroundType::BACKGROUND_TREEOFWISDOM)
+	{
+		mPlantRow[0] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[1] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[2] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[3] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[4] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[5] = PlantRowType::PLANTROW_DIRT;
+
+		if (mApp->IsAdventureMode() && mApp->IsFirstTimeAdventureMode())
+		{
+			if (mLevel == 1)
+			{
+				mPlantRow[0] = PlantRowType::PLANTROW_DIRT;
+				mPlantRow[1] = PlantRowType::PLANTROW_DIRT;
+				mPlantRow[3] = PlantRowType::PLANTROW_DIRT;
+				mPlantRow[4] = PlantRowType::PLANTROW_DIRT;
+			}
+			else if (mLevel == 2 || mLevel == 3)
+			{
+				mPlantRow[0] = PlantRowType::PLANTROW_DIRT;
+				mPlantRow[4] = PlantRowType::PLANTROW_DIRT;
+			}
+		}
+		else if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RESODDED)
+		{
+			mPlantRow[0] = PlantRowType::PLANTROW_DIRT;
+			mPlantRow[4] = PlantRowType::PLANTROW_DIRT;
+		}
+	}
+	else if (mBackground == BackgroundType::BACKGROUND_2_NIGHT)
+	{
+		mPlantRow[0] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[1] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[2] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[3] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[4] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[5] = PlantRowType::PLANTROW_DIRT;
+	}
+	else if (mBackground == BackgroundType::BACKGROUND_3_POOL || mBackground == BackgroundType::BACKGROUND_ZOMBIQUARIUM || mBackground == BackgroundType::BACKGROUND_4_FOG)
+	{
+		mPlantRow[0] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[1] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[2] = PlantRowType::PLANTROW_POOL;
+		mPlantRow[3] = PlantRowType::PLANTROW_POOL;
+		mPlantRow[4] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[5] = PlantRowType::PLANTROW_NORMAL;
+	}
+	else if (mBackground == BackgroundType::BACKGROUND_5_ROOF || mBackground == BackgroundType::BACKGROUND_6_BOSS)
+	{
+		mPlantRow[0] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[1] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[2] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[3] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[4] = PlantRowType::PLANTROW_NORMAL;
+		mPlantRow[5] = PlantRowType::PLANTROW_DIRT;
+	}
+	else
+	{
+		TOD_ASSERT();
+	}
+
+	for (int x = 0; x < MAX_GRID_SIZE_X; x++)
+	{
+		for (int y = 0; y < MAX_GRID_SIZE_Y; y++)
+		{
+			if (mPlantRow[y] == PlantRowType::PLANTROW_DIRT)
+			{
+				mGridSquareType[x][y] = GridSquareType::GRIDSQUARE_DIRT;
+			}
+			else if (mPlantRow[y] == PlantRowType::PLANTROW_POOL && x >= 0 && x <= 8)
+			{
+				mGridSquareType[x][y] = GridSquareType::GRIDSQUARE_POOL;
+			}
+			else if (mPlantRow[y] == PlantRowType::PLANTROW_HIGH_GROUND && x >= 4 && x <= 8)
+			{
+				mGridSquareType[x][y] = GridSquareType::GRIDSQUARE_HIGH_GROUND;
+			}
+		}
+	}
+
 }
 
 void Board::AddSunMoney(int theAmount)
@@ -9801,6 +10064,29 @@ void Board::DrawHealthbar(Graphics* g, Rect rect, Color maxColor, int maxNumber,
 		g->DrawRect(Rect(barX - 1, barY - 1, barWidth + 1, barHeight + 1));
 	}
 	g->SetColor(lastColor);
+}
+
+/*LawnTweaks - the difference is its transparent, doesnt draw the max, text is in the bar instead of floating above*/
+void Board::DrawHealthbarMini(Graphics* g, Rect rect, Color maxColor, int maxNumber, Color baseColor, int baseNumber, int barWidth, int barHeight, int barOffsetX, int barOffsetY, Color textColor, Font* textFont, int textOffsetY, Color textOutlineColor, int textOutlineOffset, bool drawBarOutline)
+{
+	int barX = rect.mX + (rect.mWidth - barWidth) / 2 - barOffsetX;
+	int barY = rect.mY - barHeight - barOffsetY;
+	int basePercentage = baseNumber * 100 / maxNumber;
+	int baseBarWidth = barWidth * basePercentage / 100;
+	Color lastColor = g->mColor;
+	g->SetColor(maxColor);
+	g->FillRect(Rect(barX + baseBarWidth, barY, barWidth - baseBarWidth, barHeight));
+	g->SetColor(baseColor);
+	g->FillRect(Rect(barX, barY, baseBarWidth, barHeight));
+	if (drawBarOutline)
+	{
+		g->SetColor(Color::Black);
+		g->DrawRect(Rect(barX - 1, barY - 1, barWidth + 1, barHeight + 1));
+	}
+	g->SetColor(lastColor);
+	SexyString text = StrFormat(_S("%d"), baseNumber);
+	TodDrawString(g, text, barX + (barWidth / 2) + textOutlineOffset, barY + textOutlineOffset + 10, textFont, textOutlineColor, DS_ALIGN_CENTER);
+	TodDrawString(g, text, barX + (barWidth / 2), barY + 10, textFont, textColor, DS_ALIGN_CENTER);
 }
 
 

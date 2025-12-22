@@ -56,6 +56,7 @@ public:
 	Sexy::Checkbox*			mAutoCollectCoinsBox;
 	Sexy::Checkbox*			mZombieHealthbarsBox;
 	Sexy::Checkbox*			mPlantHealthbarsBox;
+	Sexy::Checkbox*			mExtraBarsBox; /*LawnTweaks - extra hud checkbox*/
 	LawnStoneButton*		mAlmanacButton;						
 	LawnStoneButton*		mBackToMainButton;					
 	LawnStoneButton*		mRestartButton;						

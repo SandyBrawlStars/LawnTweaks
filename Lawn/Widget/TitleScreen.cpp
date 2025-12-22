@@ -191,6 +191,9 @@ void TitleScreen::Update()
 	{
 		return;
 	}
+	/*LawnTweaks - 3d accel fix*/
+	mApp->Set3DAcclerated(true);
+	mApp->mIs3dAccel = true;
 
 	MarkDirty();
 	if (!mDrawnYet)

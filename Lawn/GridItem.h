@@ -73,4 +73,13 @@ public:
 	/*inline*/ bool			IsOpenPortal();
 };
 
+/*LawnTweaks - definitions for the grid item names for debug mode*/
+class GridItemDefinition
+{
+public:
+	GridItemType                      mGridItemType; // grid item identifier
+	const SexyChar* mItemName; // grid item name
+};
+extern GridItemDefinition gGridItemDefs[NUM_GRID_ITEM_TYPES];
+
 #endif

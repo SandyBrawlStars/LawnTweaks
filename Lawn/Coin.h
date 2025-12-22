@@ -76,4 +76,13 @@ public:
     static /*inline*/ bool  IsMoney(CoinType theType);
 };
 
+/*LawnTweaks - coin defintions, meant for debug menu strings*/
+class CoinDefinition
+{
+public:
+    CoinType                      mCoinType; // coin identifier
+    const SexyChar* mCoinName; // coin name
+};
+extern CoinDefinition gCoinDefs[NUM_COIN_TYPES];
+
 #endif

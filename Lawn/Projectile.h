@@ -12,12 +12,14 @@ namespace Sexy
 };
 using namespace Sexy;
 
+/*LawnTweaks - added projectile names for debug menu strings*/
 class ProjectileDefinition
 {
 public:
     ProjectileType          mProjectileType; //the type of the projectile
     int                     mImageRow; // (UNUSED) image row of the projectile used in betas
     int                     mDamage; // how much damage it deals
+    const SexyChar*         mProjectileName; // Name of the projectile
 };
 extern ProjectileDefinition gProjectileDefinition[NUM_PROJECTILES];  
 

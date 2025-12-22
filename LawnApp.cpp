@@ -155,6 +155,7 @@ LawnApp::LawnApp()
 	mProfileMgr = new ProfileMgr();
 	mRegisterResourcesLoaded = false;
 	mTodCheatKeys = false;
+	mExtraBars = false;
 	mCrazyDaveReanimID = ReanimationID::REANIMATIONID_NULL;
 	mCrazyDaveState = CrazyDaveState::CRAZY_DAVE_OFF;
 	mCrazyDaveBlinkCounter = 0;
@@ -1208,6 +1209,8 @@ bool LawnApp::KillNewOptionsDialog()
 		mAutoCollectCoins = aNewOptionsDialog->mAutoCollectCoinsBox->IsChecked();
 		mZombieHealthbars = aNewOptionsDialog->mZombieHealthbarsBox->IsChecked();
 		mPlantHealthbars = aNewOptionsDialog->mPlantHealthbarsBox->IsChecked();
+		/*LawnTweaks - extra hud option*/
+		mExtraBars = aNewOptionsDialog->mExtraBarsBox->IsChecked();
 		ToggleDebugMode();
 		bool wantWindowed = !aNewOptionsDialog->mFullscreenCheckbox->IsChecked();
 		SwitchScreenMode(wantWindowed, want3D, false);
@@ -1491,6 +1494,7 @@ void LawnApp::HandleCmdLineParam(const std::string& theParamName, const std::str
 #ifdef _DEBUG
 		mTodCheatKeys = true;
 		mDebugKeysEnabled = true;
+		mExtraBars = true;
 #endif
 	}
 	else
@@ -2579,6 +2583,11 @@ bool LawnApp::HasSeedType(SeedType theSeedType)
 		return mPlayerInfo->mPurchases[theSeedType - SeedType::SEED_GATLINGPEA];
 	*/
 
+	if (theSeedType == SeedType::SEED_GATLINGPEA)
+	{
+		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_GATLINGPEA] > 0;
+	}
+	/*LawnTweaks - Gatling pea in adventure fix*/
 	if (theSeedType == SeedType::SEED_TWINSUNFLOWER)
 	{
 		return mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PLANT_TWINSUNFLOWER] > 0;
