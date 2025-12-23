@@ -502,8 +502,6 @@ void SeedChooserScreen::LandFlyingSeed(ChosenSeed& theChosenSeed)
 	{
 		theChosenSeed.mX = theChosenSeed.mEndX;
 		theChosenSeed.mY = theChosenSeed.mEndY;
-		theChosenSeed.mY += theChosenSeed.mSeedType == SEED_IMITATER ? 0 : mScrollPosition;
-		/*LawnTweaks - Seeds autojumping back to chooser fix part 3, scroll fix*/
 		theChosenSeed.mTimeStartMotion = 0;
 		theChosenSeed.mTimeEndMotion = 0;
 		theChosenSeed.mSeedState = SEED_IN_CHOOSER;
@@ -567,8 +565,7 @@ void SeedChooserScreen::Update()
 		if (mApp->SeedTypeAvailable(aSeedType))
 		{
 			ChosenSeed& aChosenSeed = mChosenSeeds[aSeedType];
-			if (aChosenSeed.mSeedState == SEED_FLYING_TO_BANK || aChosenSeed.mSeedState == SEED_FLYING_TO_CHOOSER)
-				/*LawnTweaks - Seeds autojumping back to chooser fix part 1, adding flying_to_chooser*/
+			if (aChosenSeed.mSeedState == SEED_FLYING_TO_BANK)
 			{
 				int aTimeStart = aChosenSeed.mTimeStartMotion;
 				int aTimeEnd = aChosenSeed.mTimeEndMotion;
@@ -903,18 +900,17 @@ void SeedChooserScreen::ClickedSeedInBank(ChosenSeed& theChosenSeed)
 			mSeedsInFlight++;
 		}
 	}
-	theChosenSeed.mTimeStartMotion = mSeedChooserAge;
-	theChosenSeed.mTimeEndMotion = mSeedChooserAge + 25;
-	theChosenSeed.mStartX = theChosenSeed.mX;
-	theChosenSeed.mStartY = theChosenSeed.mY;
-	GetSeedPositionInChooser(theChosenSeed.mSeedType, theChosenSeed.mEndX, theChosenSeed.mEndY);
+	//theChosenSeed.mTimeStartMotion = mSeedChooserAge;
+   //theChosenSeed.mTimeEndMotion = mSeedChooserAge + 25;
+   //theChosenSeed.mStartX = theChosenSeed.mX;
+   //theChosenSeed.mStartY = theChosenSeed.mY;
+	GetSeedPositionInChooser(theChosenSeed.mSeedType, theChosenSeed.mX, theChosenSeed.mY);
 	theChosenSeed.mY += theChosenSeed.mSeedType == SEED_IMITATER ? 0 : mScrollPosition;
-	theChosenSeed.mSeedState = SEED_FLYING_TO_CHOOSER;
+	theChosenSeed.mSeedState = SEED_IN_CHOOSER;
 	theChosenSeed.mImitaterType = SEED_NONE;
 	theChosenSeed.mSeedIndexInBank = 0;
 	mSeedsInBank--;
-	mSeedsInFlight++;
-	/*LawnTweaks - Seeds autojumping back to chooser fix part 2, added back removed code*/
+	//mSeedsInFlight++;
 	RemoveToolTip();
 	EnableStartButton(false);
 	mApp->PlaySample(Sexy::SOUND_TAP);

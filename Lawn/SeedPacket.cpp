@@ -656,6 +656,13 @@ void SeedPacket::Draw(Graphics* g)
 
 		DrawSeedPacket(g, mOffsetX, 0.0f, mPacketType, mImitaterType, aPercentDark, aGrayness, aDrawCost, true);
 	}
+	/*LawnTweaks - shows cooldown when extra hud is enabled*/
+	if (mRefreshCounter > 0 && mApp->mExtraBars)
+	{
+		SexyString text = StrFormat(_S("%.2f"), (mRefreshTime - mRefreshCounter) / 100.0);
+		TodDrawString(g, text, 6 + (40 / 2) + 1, 30 + 1 + 10, FONT_BRIANNETOD12, Color::Black, DS_ALIGN_CENTER);
+		TodDrawString(g, text, 6 + (40 / 2), 30 + 10, FONT_BRIANNETOD12, Color::White, DS_ALIGN_CENTER);
+	}
 }
 
 bool SeedPacket::CanPickUp()
