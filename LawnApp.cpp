@@ -129,9 +129,9 @@ LawnApp::LawnApp()
 	mDebugKeysEnabled = false;
 	isFastMode = false;
 	mProdName = "PlantsVsZombies";
-	mVersion = "v2.0";
+	mVersion = "v1.0";
 	mReconVersion = "PvZ: QoTL " + mVersion;
-	std::string aTitleName = "Plants vs. Zombies: QoTL";
+	std::string aTitleName = "Plants vs. Zombies: Lawn Tweaks";
 	aTitleName += " " + mVersion;
 #ifdef _DEBUG
 	aTitleName += " DEBUG";

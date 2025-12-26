@@ -230,6 +230,16 @@ Board::Board(LawnApp* theApp)
 
 Board::~Board()
 {
+	std::string aTitleName = "Plants vs. Zombies: Lawn Tweaks";
+	aTitleName += " " + mApp->mVersion;
+#ifdef _DEBUG
+	aTitleName += " DEBUG";
+#endif
+
+	SetWindowText(
+		GetActiveWindow(),
+		aTitleName.c_str()
+	);
 	delete mAdvice;
 	delete mCursorObject;
 	delete mCursorPreview;
@@ -5610,6 +5620,26 @@ void Board::Update()
 		Details = (mApp->mPlayedQuickplay ? "Quick Play" : "Adventure") + mApp->GetStageString(mLevel);
 	mApp->mDetails = Details;
 
+	std::string aTitleName = "Plants vs. Zombies: Lawn Tweaks";
+	aTitleName += " " + mApp->mVersion;
+#ifdef _DEBUG
+	aTitleName += " DEBUG";
+#endif
+
+	aTitleName += " | " + Details;
+	int aMinutes = mMainCounter / 6000;
+	int aSeconds = (mMainCounter % 6000) / 100;
+	aTitleName += " | Wave " + std::to_string(mCurrentWave);
+	aTitleName += " | ";
+	if (aMinutes < 10) aTitleName += "0";
+	aTitleName += std::to_string(aMinutes);
+	aTitleName += ":";
+	if (aSeconds < 10) aTitleName += "0";
+	aTitleName += std::to_string(aSeconds);
+	SetWindowText(
+		GetActiveWindow(),
+		aTitleName.c_str()
+	);
 	SexyString State;
 	if (mApp->GetDialog(Dialogs::DIALOG_CONTINUE))
 		State = "Continue?";

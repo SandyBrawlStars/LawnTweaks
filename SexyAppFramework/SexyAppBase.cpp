@@ -4703,7 +4703,6 @@ void SexyAppBase::MakeWindow()
 		DWORD aWindowStyle = WS_CLIPCHILDREN | WS_POPUP | WS_BORDER | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 		if (mEnableMaximizeButton)
 			aWindowStyle |= WS_MAXIMIZEBOX;
-
 		RECT aRect;
 		aRect.left = 0;
 		aRect.top = 0;
