@@ -128,10 +128,13 @@ LawnApp::LawnApp()
 	mAutoStartLoadingThread = false;
 	mDebugKeysEnabled = false;
 	isFastMode = false;
+	/*LawnTweaks - you can set your own mod name for the window (board functions do change it later
+	but you can still mVersion for your mod version and mReconVersion for the advanced options screen*/
 	mProdName = "PlantsVsZombies";
 	mVersion = "v1.0";
-	mReconVersion = "PvZ: QoTL " + mVersion;
-	std::string aTitleName = "Plants vs. Zombies: Lawn Tweaks";
+	mReconVersion = "PvZ: LawnTweaks " + mVersion;
+	mModName = "LawnTweaks";
+	std::string aTitleName = "Plants vs. Zombies: " + mModName;
 	aTitleName += " " + mVersion;
 #ifdef _DEBUG
 	aTitleName += " DEBUG";

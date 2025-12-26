@@ -230,7 +230,8 @@ Board::Board(LawnApp* theApp)
 
 Board::~Board()
 {
-	std::string aTitleName = "Plants vs. Zombies: Lawn Tweaks";
+	/*LawnTweaks - Code for resetting game title to original version*/
+	std::string aTitleName = "Plants vs. Zombies: " + mApp->mModName;
 	aTitleName += " " + mApp->mVersion;
 #ifdef _DEBUG
 	aTitleName += " DEBUG";
@@ -5620,7 +5621,8 @@ void Board::Update()
 		Details = (mApp->mPlayedQuickplay ? "Quick Play" : "Adventure") + mApp->GetStageString(mLevel);
 	mApp->mDetails = Details;
 
-	std::string aTitleName = "Plants vs. Zombies: Lawn Tweaks";
+	/*LawnTweaks - Code for setting window title - mod name + level name + wave + timer*/
+	std::string aTitleName = "Plants vs. Zombies: " + mApp->mModName;
 	aTitleName += " " + mApp->mVersion;
 #ifdef _DEBUG
 	aTitleName += " DEBUG";
@@ -5629,7 +5631,9 @@ void Board::Update()
 	aTitleName += " | " + Details;
 	int aMinutes = mMainCounter / 6000;
 	int aSeconds = (mMainCounter % 6000) / 100;
+
 	aTitleName += " | Wave " + std::to_string(mCurrentWave);
+
 	aTitleName += " | ";
 	if (aMinutes < 10) aTitleName += "0";
 	aTitleName += std::to_string(aMinutes);

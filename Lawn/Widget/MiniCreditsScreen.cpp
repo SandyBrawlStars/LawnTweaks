@@ -17,6 +17,8 @@ MiniCreditsScreen::MiniCreditsScreen(LawnApp* theApp)
 	mApp->mMusic->MakeSureMusicIsPlaying(MUSIC_TUNE_CHOOSE_YOUR_SEEDS);
 	TodLoadResources("DelayLoad_ChallengeScreen");
 	TodLoadResources("DelayLoad_Credits");
+	/*LawnTweaks - now uses night background because its cool, you can still change this + the DrawImage
+	in the next function to use other stuff*/
 	TodLoadResources("DelayLoad_Background2");
 
 	mBackButton = MakeNewButton(0, this, _S("[BACK_TO_MENU]"), nullptr, Sexy::IMAGE_SEEDCHOOSER_BUTTON2,

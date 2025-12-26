@@ -140,8 +140,10 @@ public:
 	SexyString                      mDetails;
 	SexyString                      mState;
 
-	/*LawnTweaks - mExtraBars - for extra hud mode*/
+	/*LawnTweaks - mExtraBars - for extra hud mode
+	mModName - your mods name, shows up on window title*/
 	bool					        mExtraBars;
+	SexyString                      mModName;
 
 public:
 	LawnApp();

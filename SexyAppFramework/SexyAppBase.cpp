@@ -3954,7 +3954,9 @@ void SexyAppBase::ProcessDemo()
 
 								// We don't want any sounds (or music) playing while its minimized
 								if (mMinimized)
+								{
 									Mute(true);
+								}
 								else
 								{
 									Unmute(true);
@@ -4564,7 +4566,9 @@ bool SexyAppBase::ProcessDeferredMessages(bool singleMessage)
 						if (mMinimized)
 						{
 							if (mMuteOnLostFocus)
+							{
 								Mute(true);
+							}
 						}
 						else
 						{
