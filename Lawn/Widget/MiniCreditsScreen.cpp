@@ -17,6 +17,7 @@ MiniCreditsScreen::MiniCreditsScreen(LawnApp* theApp)
 	mApp->mMusic->MakeSureMusicIsPlaying(MUSIC_TUNE_CHOOSE_YOUR_SEEDS);
 	TodLoadResources("DelayLoad_ChallengeScreen");
 	TodLoadResources("DelayLoad_Credits");
+	TodLoadResources("DelayLoad_Background2");
 
 	mBackButton = MakeNewButton(0, this, _S("[BACK_TO_MENU]"), nullptr, Sexy::IMAGE_SEEDCHOOSER_BUTTON2,
 		Sexy::IMAGE_SEEDCHOOSER_BUTTON2_GLOW, Sexy::IMAGE_SEEDCHOOSER_BUTTON2_GLOW);
@@ -48,7 +49,7 @@ MiniCreditsScreen::~MiniCreditsScreen()
 void MiniCreditsScreen::Draw(Graphics* g)
 {
 	//g->SetLinearBlend(true);
-	g->DrawImage(Sexy::IMAGE_CREDITS_BG, 0, 0);
+	g->DrawImage(Sexy::IMAGE_BACKGROUND2, -220, 0);
 	TodDrawString(g, "CREDITS", 400, 58, Sexy::FONT_HOUSEOFTERROR28, Color(220, 220, 220), DS_ALIGN_CENTER);
 
 	Color TextColor = Color(255, 255, 255);
@@ -75,6 +76,10 @@ void MiniCreditsScreen::Draw(Graphics* g)
 	TodDrawString(g, "PvZ Modding Association Members\n", 630, 460, Sexy::FONT_HOUSEOFTERROR16, TextColor, DS_ALIGN_CENTER);
 	TodDrawString(g, "Yukinonon\n", 630, 480, Sexy::FONT_HOUSEOFTERROR16, TextColor, DS_ALIGN_CENTER);
 	TodDrawString(g, "timoox_\n", 630, 500, Sexy::FONT_HOUSEOFTERROR16, TextColor, DS_ALIGN_CENTER);
+
+	TodDrawString(g, "LawnTweaks Team \n", 400, 480, Sexy::FONT_HOUSEOFTERROR16, TextColor, DS_ALIGN_CENTER);
+	TodDrawString(g, "Sandy\n", 400, 500, Sexy::FONT_HOUSEOFTERROR16, TextColor, DS_ALIGN_CENTER);
+	TodDrawString(g, "Extra Help - BoneL and TrashOfTheVillage\n", 400, 520, Sexy::FONT_HOUSEOFTERROR16, TextColor, DS_ALIGN_CENTER);
 
 	//mMusicButton->Draw(g);
 }
