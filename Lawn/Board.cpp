@@ -230,7 +230,7 @@ Board::Board(LawnApp* theApp)
 
 Board::~Board()
 {
-	/*LawnTweaks - Code for resetting game title to original version*/
+	/*LawnTweaks - Code for resetting game title to original version (no level names and data)*/
 	std::string aTitleName = "Plants vs. Zombies: " + mApp->mModName;
 	aTitleName += " " + mApp->mVersion;
 #ifdef _DEBUG
