@@ -5632,7 +5632,7 @@ void Board::Update()
 	int aMinutes = mMainCounter / 6000;
 	int aSeconds = (mMainCounter % 6000) / 100;
 
-	aTitleName += " | Wave " + std::to_string(mCurrentWave);
+	aTitleName += " | " + std::to_string(int(mProgressMeterWidth / 1.5)) + "%";
 
 	aTitleName += " | ";
 	if (aMinutes < 10) aTitleName += "0";
