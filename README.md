@@ -14,7 +14,7 @@ Recommendation: Search /*LawnTweaks for comments on the changes in this decomp
 - Zombiefiable projectiles (litterally just a variable)
 - Uhhh almanac shows specific plant cooldown and has options for some colors and stuff (input color names like {RED} or {LIGHTBLUE})
 (genuinly idk who cares i just added this here)
-- 
+
 
 
 # Credits:
