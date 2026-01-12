@@ -75,6 +75,12 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	mProjectileAge = 0;
 	mClickBackoffCounter = 0;
 	mAnimTicksPerFrame = 0;
+	mIsZombie = false;
+
+	if (mProjectileType == PROJECTILE_ZOMBIE_PEA)
+	{
+		mIsZombie = true;
+	}
 
 	if (mProjectileType == ProjectileType::PROJECTILE_CABBAGE || mProjectileType == ProjectileType::PROJECTILE_BUTTER)
 	{
@@ -155,7 +161,7 @@ Plant* Projectile::FindCollisionTargetPlant()
 		Rect aPlantRect = aPlant->GetPlantRect();
 		if (GetRectOverlap(aProjectileRect, aPlantRect) > 8)
 		{
-			if (mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA)
+			if (mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA || mIsZombie)
 			{
 				return mBoard->GetTopPlantAt(aPlant->mPlantCol, aPlant->mRow, PlantPriority::TOPPLANT_EATING_ORDER);
 			}
@@ -292,6 +298,20 @@ void Projectile::CheckForCollision()
 			mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
 			mApp->AddTodParticle(mPosX - 3.0f, mPosY + 17.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_PEA_SPLAT);
 			Die();
+		}
+		return;
+	}
+	else if (mIsZombie)
+	{
+		Plant* aPlant = FindCollisionTargetPlant();
+		if (aPlant)
+		{
+			const ProjectileDefinition& aProjectileDef = GetProjectileDef();
+			aPlant->mPlantHealth -= aProjectileDef.mDamage;
+			aPlant->mEatenFlashCountdown = max(aPlant->mEatenFlashCountdown, 25);
+
+			mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
+			DoImpact(nullptr);
 		}
 		return;
 	}
@@ -546,7 +566,7 @@ void Projectile::UpdateLobMotion()
 
 	Plant* aPlant = nullptr;
 	Zombie* aZombie = nullptr;
-	if (mProjectileType == ProjectileType::PROJECTILE_BASKETBALL || mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA)
+	if (mProjectileType == ProjectileType::PROJECTILE_BASKETBALL || mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA || mIsZombie)
 	{
 		aPlant = FindCollisionTargetPlant();
 	}
@@ -832,6 +852,11 @@ void Projectile::DoImpact(Zombie* theZombie)
 		mBoard->ShakeBoard(3, -4);
 	}
 	else if (mProjectileType == ProjectileType::PROJECTILE_PEA)
+	{
+		aSplatPosX -= 15.0f;
+		aEffect = ParticleEffect::PARTICLE_PEA_SPLAT;
+	}
+	else if (mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA)
 	{
 		aSplatPosX -= 15.0f;
 		aEffect = ParticleEffect::PARTICLE_PEA_SPLAT;

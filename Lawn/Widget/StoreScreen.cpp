@@ -425,7 +425,7 @@ void StoreScreen::Draw(Graphics* g)
     mDrawnOnce = true;
 
     int aStoreSignPosY = TodAnimateCurve(50, 110, mStoreTime, -150, 0, CURVE_EASE_IN_OUT);
-    if (mApp->mBoard != nullptr && mApp->mBoard->StageIsNight())
+    if ((mApp->mBoard != nullptr && mApp->mBoard->StageIsNight()) || (mApp->mPlayerInfo->mLevel >= 31 && mApp->mPlayerInfo->mLevel <= 40))
     {
         g->DrawImage(Sexy::IMAGE_STORE_BACKGROUNDNIGHT, 0, 0);
     }

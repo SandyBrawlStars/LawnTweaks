@@ -52,7 +52,8 @@ public:
     float                   mCobTargetX;            
     int                     mCobTargetRow;          
     ZombieID                mTargetZombieID;        
-    int                     mLastPortalX;           
+    int                     mLastPortalX;  
+    bool                    mIsZombie;
 
 public:
     Projectile();

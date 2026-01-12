@@ -7,8 +7,8 @@
 int gTodStringFormatCount;               
 TodStringListFormat* gTodStringFormats;  
 
-int gLawnStringFormatCount = 12;
-TodStringListFormat gLawnStringFormats[14] = {    
+int gLawnStringFormatCount = 29;
+TodStringListFormat gLawnStringFormats[29] = {    
 	{ "NORMAL",           nullptr,    Color(40,   50,     90,     255),       0,      0U },
 	{ "FLAVOR",           nullptr,    Color(143,  67,     27,     255),       0,      1U },
 	{ "KEYWORD",          nullptr,    Color(143,  67,     27,     255),       0,      0U },
@@ -22,7 +22,22 @@ TodStringListFormat gLawnStringFormats[14] = {
 	{ "CREDITS1",         nullptr,    Color(0,    0,      0,      0),         3,      0U },
 	{ "CREDITS2",         nullptr,    Color(0,    0,      0,      0),         2,      0U },
 	{ "NORMAL",           nullptr,    Color(40,   50,     90,     255),       0,      0U },
-	{ "KEYWORD",          nullptr,    Color(143,  67,     27,     255),       0,      0U }
+	{ "KEYWORD",          nullptr,    Color(143,  67,     27,     255),       0,      0U },
+	{ "RED",           nullptr,    Color(255,   0,     0,     255),       0,      0U },
+	{ "GREEN",           nullptr,    Color(2, 207, 2,     255),       0,      0U },
+	{ "BLUE",           nullptr,    Color(37, 58, 247,     255),       0,      0U },
+	{ "ORANGE",           nullptr,    Color(235, 125, 0,     255),       0,      0U },
+	{ "YELLOW",           nullptr,    Color(207, 166, 2,     255),       0,      0U },
+	{ "CYAN",           nullptr,    Color(4, 204, 187,     255),       0,      0U },
+	{ "LIGHTBLUE",           nullptr,    Color(5, 153, 245,     255),       0,      0U },
+	{ "LIGHTPURPLE",           nullptr,    Color(49, 5, 245,     255),       0,      0U },
+	{ "PURPLE",           nullptr,    Color(133, 5, 245,     255),       0,      0U },
+	{ "PINK",           nullptr,    Color(252, 5, 203,     255),       0,      0U },
+	{ "LIME",           nullptr,    Color(88, 217, 2,     255),       0,      0U },
+	{ "MINT",           nullptr,    Color(0, 212, 67,     255),       0,      0U },
+	{ "WHITE",           nullptr,    Color(230, 231, 232,     255),       0,      0U },
+	{ "GRAY",           nullptr,    Color(131, 132, 133,     255),       0,      0U },
+	{ "BLACK",           nullptr,    Color(54, 53, 53,     255),       0,      0U },
 };
 
 TodStringListFormat::TodStringListFormat()

@@ -1411,13 +1411,15 @@ void Board::InitLevel()
 	}
 	else if (aGameMode == GameMode::GAMEMODE_CHALLENGE_ICE)
 	{
-		TOD_ASSERT(mSeedBank->mNumPackets == 6);
 		mSeedBank->mSeedPackets[0].SetPacketType(SeedType::SEED_PEASHOOTER);
-		mSeedBank->mSeedPackets[1].SetPacketType(SeedType::SEED_CHERRYBOMB);
-		mSeedBank->mSeedPackets[2].SetPacketType(SeedType::SEED_WALLNUT);
-		mSeedBank->mSeedPackets[3].SetPacketType(SeedType::SEED_REPEATER);
-		mSeedBank->mSeedPackets[4].SetPacketType(SeedType::SEED_SNOWPEA);
-		mSeedBank->mSeedPackets[5].SetPacketType(SeedType::SEED_CHOMPER);
+		mSeedBank->mSeedPackets[1].SetPacketType(SeedType::SEED_SUNFLOWER);
+		mSeedBank->mSeedPackets[2].SetPacketType(SeedType::SEED_CHERRYBOMB);
+		mSeedBank->mSeedPackets[3].SetPacketType(SeedType::SEED_WALLNUT);
+		mSeedBank->mSeedPackets[4].SetPacketType(SeedType::SEED_POTATOMINE);
+		mSeedBank->mSeedPackets[5].SetPacketType(SeedType::SEED_SNOWPEA);
+		mSeedBank->mSeedPackets[6].SetPacketType(SeedType::SEED_CHOMPER);
+		mSeedBank->mSeedPackets[7].SetPacketType(SeedType::SEED_REPEATER);
+		mSeedBank->mSeedPackets[8].SetPacketType(SeedType::SEED_PUFFSHROOM);
 	}
 	else if (aGameMode == GameMode::GAMEMODE_CHALLENGE_ZOMBIQUARIUM)
 	{
@@ -1660,8 +1662,7 @@ void Board::StartLevel()
 		FreezeEffectsForCutscene(false);
 		mApp->mSoundSystem->GamePause(false);
 	}
-	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ICE || 
-		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || 
+	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || 
 		mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM ||
 		mApp->mGameMode == GameMode::GAMEMODE_UPSELL || 
 		mApp->mGameMode == GameMode::GAMEMODE_INTRO || 
@@ -6480,7 +6481,22 @@ void Board::DrawGameObjects(Graphics* g)
 			if (aZombie->mBodyHealth > 0)
 			{
 				barOffsetY += baseBarOffsetY;
-				DrawHealthbarMini(g, rect, maxColor, aZombie->mBodyMaxHealth, Color(255, 255, 0, 200), aZombie->mBodyHealth, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				if (aZombie->mBodyMaxHealth < 3000)
+				{
+					DrawHealthbarMini(g, rect, maxColor, aZombie->mBodyMaxHealth, Color(255, 255, 0, 200), aZombie->mBodyHealth, barWidth, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
+				else if (aZombie->mBodyMaxHealth < 6000)
+				{
+					DrawHealthbarMini(g, rect, maxColor, aZombie->mBodyMaxHealth, Color(255, 255, 0, 200), aZombie->mBodyHealth, barWidth + 10, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
+				else if (aZombie->mBodyMaxHealth < 8000)
+				{
+					DrawHealthbarMini(g, rect, maxColor, aZombie->mBodyMaxHealth, Color(255, 255, 0, 200), aZombie->mBodyHealth, barWidth + 15, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
+				else
+				{
+					DrawHealthbarMini(g, rect, maxColor, aZombie->mBodyMaxHealth, Color(255, 255, 0), aZombie->mBodyHealth, barWidth + 20, barHeight, 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
 			}
 			if (aZombie->mHelmHealth > 0)
 			{
@@ -6642,7 +6658,7 @@ bool Board::HasProgressMeter()
 		mApp->IsFinalBossLevel() || 
 		mApp->IsSlotMachineLevel() || 
 		mApp->IsSquirrelLevel() || 
-		mApp->IsIZombieLevel())
+		mApp->IsIZombieLevel() || mApp->IsArtChallenge())
 		return true;
 
 	if (mProgressMeterWidth == 0)
@@ -6665,6 +6681,7 @@ bool Board::ProgressMeterHasFlags()
 	if (mApp->IsWhackAZombieLevel() ||
 		mApp->IsFinalBossLevel() ||
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED ||
+		mApp->IsArtChallenge() ||
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST ||
 		mApp->IsSlotMachineLevel() ||
 		mApp->IsSquirrelLevel() ||
@@ -6693,6 +6710,27 @@ void Board::DrawProgressMeter(Graphics* g)
 	{
 		SexyString aMatchStr = StrFormat(_S("%d / %d %s"), mChallenge->mChallengeScore, 75, TodStringTranslate(_S("[MATCHES]")).c_str());
 		TodDrawString(g, aMatchStr, aPosX, 589, Sexy::FONT_DWARVENTODCRAFT12, aColor, DrawStringJustification::DS_ALIGN_CENTER);
+	}
+	else if (mApp->IsArtChallenge())
+	{
+		int score = 0;
+		Plant* aPlant = nullptr;
+		for (int x = 0; x < MAX_GRID_SIZE_X; x++)
+		{
+			for (int y = 0; y < MAX_GRID_SIZE_Y; y++)
+			{
+				PlantsOnLawn aPlantsOnLawn;
+				GetPlantsOnLawn(x, y, &aPlantsOnLawn);
+				aPlant = aPlantsOnLawn.mNormalPlant;
+				if (aPlant && aPlant->mSeedType == mChallenge->GetArtChallengeSeed(x, y))
+					score++;
+			}
+		}
+		SexyString aPlantName = (mApp->mGameMode == GAMEMODE_CHALLENGE_SEEING_STARS) ? "Starfruits" : (mApp->mGameMode == GAMEMODE_CHALLENGE_ART_CHALLENGE_SUNFLOWER) ? "Plants" : "Wallnuts";
+		int maxScore = (mApp->mGameMode == GAMEMODE_CHALLENGE_SEEING_STARS) ? 14 : (mApp->mGameMode == GAMEMODE_CHALLENGE_ART_CHALLENGE_SUNFLOWER) ? 15 : 12;
+		SexyString aMatchStr = StrFormat(_S("%d / %d %s"), score, maxScore, TodStringTranslate(_S(aPlantName)).c_str());
+		TodDrawString(g, aMatchStr, aPosX, 589, Sexy::FONT_DWARVENTODCRAFT12, aColor, DrawStringJustification::DS_ALIGN_CENTER);
+		mProgressMeterWidth = (score / float(maxScore)) * 150;
 	}
 	else if (mApp->IsSquirrelLevel())
 	{
@@ -6742,6 +6780,7 @@ void Board::DrawProgressMeter(Graphics* g)
 	g->DrawImage(Sexy::IMAGE_FLAGMETERLEVELPROGRESS, 638, 589);
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED || 
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST ||
+		mApp->IsArtChallenge() ||
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZOMBIQUARIUM || 
 		mApp->IsSquirrelLevel() || 
 		mApp->IsSlotMachineLevel() ||
@@ -7831,6 +7870,32 @@ void Board::KeyDown(KeyCode theKey)
 			mApp->DoNewOptions(false);
 		}
 	}
+
+	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ICE)
+	{
+		if (theKey == KeyCode::KEYCODE_RIGHT)
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				mSeedBank->mSeedPackets[i].mPacketType = (SeedType)(mSeedBank->mSeedPackets[i].mPacketType + 1);
+				if (mSeedBank->mSeedPackets[i].mPacketType > SEED_COBCANNON)
+				{
+					mSeedBank->mSeedPackets[i].mPacketType = SEED_PEASHOOTER;
+				}
+			}
+		}
+		if (theKey == KeyCode::KEYCODE_LEFT)
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				mSeedBank->mSeedPackets[i].mPacketType = (SeedType)(mSeedBank->mSeedPackets[i].mPacketType - 1);
+				if (mSeedBank->mSeedPackets[i].mPacketType < SEED_PEASHOOTER)
+				{
+					mSeedBank->mSeedPackets[i].mPacketType = SEED_COBCANNON;
+				}
+			}
+		}
+
 }
 
 static void TodCrash()
@@ -8981,7 +9046,7 @@ int Board::GetNumSeedsInBank()
 	}
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ICE)
 	{
-		return 6;
+		return 10;
 	}
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST)
 	{

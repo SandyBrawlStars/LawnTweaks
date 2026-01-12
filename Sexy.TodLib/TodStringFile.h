@@ -28,7 +28,7 @@ extern int gTodStringFormatCount;
 extern TodStringListFormat* gTodStringFormats;  
 
 extern int gLawnStringFormatCount;
-extern TodStringListFormat gLawnStringFormats[14];  
+extern TodStringListFormat gLawnStringFormats[29];  
 
 void                TodStringListSetColors(TodStringListFormat* theFormats, int theCount);
 void                TodWriteStringSetFormat(const char* theFormat, TodStringListFormat& theCurrentFormat);

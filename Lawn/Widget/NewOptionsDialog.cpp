@@ -141,8 +141,7 @@ NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector, bo
         mBackToGameButton->mId = NewOptionsDialog::NewOptionsDialog_Back;
     }
 
-    if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ICE ||
-        mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN ||
+    if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN ||
         mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
     {
         mRestartButton->SetVisible(false);

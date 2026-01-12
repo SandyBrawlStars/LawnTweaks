@@ -538,6 +538,12 @@ void Coin::UpdateFall()
     }
     else
     {
+        /*LawnTweaks - to make autocollect, add this code here:
+        if (mType != COIN_USABLE_SEED_PACKET)
+        {
+            Collect();
+        }
+        */
         if (mNeedsBouncyArrow && !mHasBouncyArrow)
         {
             float aParticleOffsetX = mWidth / 2;

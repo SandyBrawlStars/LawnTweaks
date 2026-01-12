@@ -392,6 +392,12 @@ void TitleScreen::Update()
 			mApp->KillGameSelector();
 			mApp->PreNewGame(GameMode::GAMEMODE_UPSELL, false);
 		}
+		else if (mQuickLoadKey == KeyCode::KEYCODE_F1)
+		{
+			mApp->LoadingCompleted();
+			mApp->KillGameSelector();
+			mApp->PreNewGame(GameMode::GAMEMODE_CHALLENGE_ICE, false);
+		}
 		else if (mQuickLoadKey == (KeyCode)0x49)
 		{
 			mApp->LoadingCompleted();

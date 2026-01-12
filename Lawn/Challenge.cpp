@@ -2160,11 +2160,6 @@ void Challenge::Update()
 	{
 		TreeOfWisdomUpdate();
 	}
-	if (mApp->mGameMode == GAMEMODE_CHALLENGE_ICE && mBoard->mMainCounter == 3000)
-	{
-		mApp->PlayFoley(FOLEY_FLOOP);
-		mApp->PlaySample(Sexy::SOUND_LOSEMUSIC);
-	}
 	if (mApp->mGameMode == GAMEMODE_CHALLENGE_LAST_STAND)
 	{
 		LastStandUpdate();
