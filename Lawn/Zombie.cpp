@@ -1258,6 +1258,16 @@ void Zombie::UpdateZombieBungee()
     if (IsDeadOrDying() || IsImmobilizied())
         return;
 
+    if (mMindControlled) {
+        mZombiePhase = ZombiePhase::PHASE_BUNGEE_RISING;
+        mAltitude += 8.0f;
+        if (mAltitude >= 600.0f)
+        {
+            DieNoLoot();
+        }
+        return;
+    }
+
     if (mZombiePhase == ZombiePhase::PHASE_BUNGEE_DIVING || mZombiePhase == ZombiePhase::PHASE_BUNGEE_DIVING_SCREAMING)
     {
         float aOldAltitude = mAltitude;
@@ -1412,7 +1422,7 @@ void Zombie::UpdateZombiePogo()
         return;
 
     Plant* aPlant = nullptr;
-    if (IsOnBoard())
+    if (IsOnBoard() && !mMindControlled)
     {
         aPlant = FindPlantTarget(ZombieAttackType::ATTACKTYPE_VAULT);
     }
@@ -1473,6 +1483,7 @@ void Zombie::ZombieCatapultFire(Plant* thePlant)
 
 Plant* Zombie::FindCatapultTarget()
 {
+    if (mMindControlled) return nullptr;
     Plant* aTarget = nullptr;
 
     Plant* aPlant = nullptr;
@@ -1628,6 +1639,7 @@ void Zombie::UpdateZombiePolevaulter()
     if (mZombiePhase == ZombiePhase::PHASE_POLEVAULTER_PRE_VAULT && mHasHead && mZombieHeight == ZombieHeight::HEIGHT_ZOMBIE_NORMAL)
     {
         Plant* aPlant = FindPlantTarget(ZombieAttackType::ATTACKTYPE_VAULT);
+        Zombie* aZombie = FindZombieTarget();
         if (aPlant)
         {
             if (mBoard->GetLadderAt(aPlant->mPlantCol, aPlant->mRow))
@@ -1647,6 +1659,21 @@ void Zombie::UpdateZombiePolevaulter()
             Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
             float aAnimDuration = aBodyReanim->mFrameCount / aBodyReanim->mAnimRate * 100.0f;
             int aJumpDistance = mX - aPlant->mX - 80;
+            if (mApp->IsWallnutBowlingLevel())
+            {
+                aJumpDistance = 0;
+            }
+            mVelX = aJumpDistance / aAnimDuration;
+            mHasObject = false;
+        }
+        else if (aZombie)
+        {
+            mZombiePhase = ZombiePhase::PHASE_POLEVAULTER_IN_VAULT;
+            PlayZombieReanim("anim_jump", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, 24.0f);
+
+            Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
+            float aAnimDuration = aBodyReanim->mFrameCount / aBodyReanim->mAnimRate * 100.0f;
+            int aJumpDistance = (!IsWalkingBackwards()) ? abs(mX - aZombie->mX - 80) : abs(mX - aZombie->mX + 80);
             if (mApp->IsWallnutBowlingLevel())
             {
                 aJumpDistance = 0;
@@ -1684,7 +1711,7 @@ void Zombie::UpdateZombiePolevaulter()
         if (aBodyReanim->mLoopCount > 0)
         {
             aJumpEnds = true;
-            mPosX -= 150.0f;
+            mPosX -= IsWalkingBackwards() ? -150.0f : 150.0f;
         }
         if (aBodyReanim->ShouldTriggerTimedEvent(0.2f))
         {
@@ -2004,14 +2031,11 @@ void Zombie::UpdateZombieGargantuar()
         Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
         if (aBodyReanim->ShouldTriggerTimedEvent(0.64f))
         {
-            if (mMindControlled)  
+            Zombie* aZombie = FindZombieTarget();
+            if (aZombie)
             {
-                Zombie* aZombie = FindZombieTarget();
-                if (aZombie)
-                {
-                    int aDamage = mZombieType == ZombieType::ZOMBIE_REDEYE_GARGANTUAR ? 1000 : 500;
-                    aZombie->TakeDamage(aDamage, 0U);
-                }
+                int aDamage = mZombieType == ZombieType::ZOMBIE_REDEYE_GARGANTUAR ? 1000 : 500;
+                aZombie->TakeDamage(aDamage, 0U);
             }
             else
             {
@@ -2145,6 +2169,10 @@ void Zombie::UpdateZombieGargantuar()
 
     bool doSmash = false;
     if (FindPlantTarget(ZombieAttackType::ATTACKTYPE_CHEW))
+    {
+        doSmash = true;
+    }
+    if (FindZombieTarget())
     {
         doSmash = true;
     }
@@ -4322,7 +4350,7 @@ void Zombie::CheckForBoardEdge()
         aEdgeX = -130;
     }
 
-    if (mX <= aEdgeX && mHasHead)
+    if (mX <= aEdgeX && mHasHead && !mMindControlled)
     {
         if (mApp->IsIZombieLevel())
         {

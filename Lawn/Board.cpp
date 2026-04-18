@@ -1420,6 +1420,7 @@ void Board::InitLevel()
 		mSeedBank->mSeedPackets[6].SetPacketType(SeedType::SEED_CHOMPER);
 		mSeedBank->mSeedPackets[7].SetPacketType(SeedType::SEED_REPEATER);
 		mSeedBank->mSeedPackets[8].SetPacketType(SeedType::SEED_PUFFSHROOM);
+		mSeedBank->mSeedPackets[9].SetPacketType(SeedType::SEED_SUNSHROOM);
 	}
 	else if (aGameMode == GameMode::GAMEMODE_CHALLENGE_ZOMBIQUARIUM)
 	{
@@ -8645,6 +8646,7 @@ void Board::KeyChar(SexyChar theChar)
 		{
 			ZombieType aDebugZombieType = static_cast<ZombieType>(mDebugObjectSelection);
 			Zombie* aZombie = AddZombieInRow(aDebugZombieType, aGridY, Zombie::ZOMBIE_WAVE_DEBUG);
+			if (aDebugZombieType != ZOMBIE_BUNGEE && aDebugZombieType != ZOMBIE_BOSS) aZombie->mPosX = aMouseX - 20;
 			return;
 
 		}
@@ -8692,7 +8694,7 @@ void Board::KeyChar(SexyChar theChar)
 
 			ZombieType aDebugZombieType = static_cast<ZombieType>(mDebugObjectSelection);
 			Zombie* aZombie = AddZombieInRow(aDebugZombieType, aGridY, Zombie::ZOMBIE_WAVE_DEBUG);
-			aZombie->mPosX = aMouseX;
+			if (aDebugZombieType != ZOMBIE_BUNGEE && aDebugZombieType != ZOMBIE_BOSS) aZombie->mPosX = aMouseX;
 			aZombie->StartMindControlled();
 			return;
 
@@ -8737,6 +8739,14 @@ void Board::KeyChar(SexyChar theChar)
 			return;
 
 		}
+		return;
+	}
+
+	if (theChar == _S('p'))
+	{
+		Zombie* aZombie = nullptr;
+		while (IterateZombies(aZombie)) aZombie->StartMindControlled();
+		DisplayAdvice("Hypnotised all zombies!", MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
 		return;
 	}
 	/*LawnTweaks - removed old zombie debugging code since it was mid*/

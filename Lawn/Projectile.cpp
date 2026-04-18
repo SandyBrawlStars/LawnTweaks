@@ -86,7 +86,7 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	{
 		mRotation = -7 * PI / 25;  // DEG_TO_RAD(-50.4f);
 		mRotationSpeed = RandRangeFloat(-0.08f, -0.02f);
-	}
+	} 
 	else if (mProjectileType == ProjectileType::PROJECTILE_MELON || mProjectileType == ProjectileType::PROJECTILE_WINTERMELON)
 	{
 		mRotation = -2 * PI / 5;  // DEG_TO_RAD(-72.0f);
@@ -286,32 +286,52 @@ void Projectile::CheckForCollision()
 		return;
 	}
 
-	if (mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA)
+	if (mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA || mIsZombie)
 	{
 		Plant* aPlant = FindCollisionTargetPlant();
+
+		Rect aProjectileRect = GetProjectileRect();
+		Zombie* aBestZombie = nullptr;
+		int aMinX = 0;
+
+		Zombie* aZombie = nullptr;
+		while (mBoard->IterateZombies(aZombie))
+		{
+			if ((aZombie->mZombieType == ZombieType::ZOMBIE_BOSS || aZombie->mRow == mRow) && aZombie->mMindControlled && aZombie->mHasHead)
+			{
+				Rect aZombieRect = aZombie->GetZombieRect();
+				if (GetRectOverlap(aProjectileRect, aZombieRect) > 0)
+				{
+					if (aBestZombie == nullptr || aZombie->mX < aMinX)
+					{
+						aBestZombie = aZombie;
+						aMinX = aZombie->mX;
+					}
+				}
+			}
+		}
 		if (aPlant)
 		{
 			const ProjectileDefinition& aProjectileDef = GetProjectileDef();
 			aPlant->mPlantHealth -= aProjectileDef.mDamage;
 			aPlant->mEatenFlashCountdown = max(aPlant->mEatenFlashCountdown, 25);
 
-			mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
-			mApp->AddTodParticle(mPosX - 3.0f, mPosY + 17.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_PEA_SPLAT);
+			if (mProjectileType == PROJECTILE_ZOMBIE_PEA) {
+				mApp->AddTodParticle(mPosX - 3.0f, mPosY + 17.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_PEA_SPLAT);
+				mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
+			}
 			Die();
 		}
-		return;
-	}
-	else if (mIsZombie)
-	{
-		Plant* aPlant = FindCollisionTargetPlant();
-		if (aPlant)
+		else if (aBestZombie)
 		{
 			const ProjectileDefinition& aProjectileDef = GetProjectileDef();
-			aPlant->mPlantHealth -= aProjectileDef.mDamage;
-			aPlant->mEatenFlashCountdown = max(aPlant->mEatenFlashCountdown, 25);
+			aBestZombie->TakeDamage(aProjectileDef.mDamage, 0U);
 
-			mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
-			DoImpact(nullptr);
+			if (mProjectileType == PROJECTILE_ZOMBIE_PEA) {
+				mApp->AddTodParticle(mPosX - 3.0f, mPosY + 17.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_PEA_SPLAT);
+				mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
+			}
+			Die();
 		}
 		return;
 	}
@@ -973,7 +993,7 @@ void Projectile::Draw(Graphics* g)
 {
 	const ProjectileDefinition& aProjectileDef = GetProjectileDef();
 
-	Image* aImage;
+	Image* aImage = IMAGE_PROJECTILEPEA;
 	float aScale = 1.0f;
 	if (mProjectileType == ProjectileType::PROJECTILE_COBBIG)
 	{
@@ -1034,10 +1054,6 @@ void Projectile::Draw(Graphics* g)
 	{
 		aImage = IMAGE_REANIM_WINTERMELON_PROJECTILE;
 		aScale = 1.0f;
-	}
-	else
-	{
-		TOD_ASSERT();
 	}
 
 	bool aMirror = false;
