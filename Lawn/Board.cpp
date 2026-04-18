@@ -2034,6 +2034,8 @@ Plant* Board::NewPlant(int theGridX, int theGridY, SeedType theSeedType, SeedTyp
 {
 	Plant* aPlant = mPlants.DataArrayAlloc();
 	aPlant->mIsOnBoard = true;
+	if (theSeedType == SEED_NONE)
+		theSeedType = SEED_PEASHOOTER;
 	aPlant->PlantInitialize(theGridX, theGridY, theSeedType, theImitaterType);
 	return aPlant;
 }
@@ -6606,22 +6608,22 @@ void Board::DrawGameObjects(Graphics* g)
 			}
 			switch (aPlant->mSeedType)
 			{
-			case SEED_CHERRYBOMB: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
-			case SEED_POTATOMINE: plantMaxCounter = 1500; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_CHOMPER: plantMaxCounter = 4000; plantCounter = aPlant->mStateCountdown;	break;
-			case SEED_GRAVEBUSTER: plantMaxCounter = 400; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_ICESHROOM: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
-			case SEED_DOOMSHROOM: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
-			case SEED_SQUASH: plantMaxCounter = 80; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_TANGLEKELP: plantMaxCounter = 100; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_JALAPENO: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
-			case SEED_SPIKEWEED: plantMaxCounter = 100; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_BLOVER: plantMaxCounter = 50; plantCounter = aPlant->mDoSpecialCountdown;  break;
-			case SEED_MAGNETSHROOM: plantMaxCounter = 1500; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_INSTANT_COFFEE: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
-			case SEED_SPIKEROCK: plantMaxCounter = 100; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_GOLD_MAGNET: plantMaxCounter = 300; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_COBCANNON: plantMaxCounter = 3000; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_CHERRYBOMB: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mDoSpecialCountdown; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_POTATOMINE: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_CHOMPER: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;	break;
+			case SEED_GRAVEBUSTER: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_ICESHROOM: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mDoSpecialCountdown; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_DOOMSHROOM: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mDoSpecialCountdown; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_SQUASH: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_TANGLEKELP: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_JALAPENO: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mDoSpecialCountdown; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_SPIKEWEED: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_BLOVER: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mDoSpecialCountdown; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_MAGNETSHROOM: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_INSTANT_COFFEE: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mDoSpecialCountdown; plantCounter = aPlant->mDoSpecialCountdown;  break;
+			case SEED_SPIKEROCK: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_GOLD_MAGNET: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
+			case SEED_COBCANNON: plantMaxCounter = GetPlantProperty(aPlant->mSeedType).mStateCountdown; plantCounter = aPlant->mStateCountdown;  break;
 			}
 			if (aPlant->mPlantHealth > -1)
 			{

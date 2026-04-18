@@ -95,7 +95,7 @@ PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
     { SeedType::SEED_ICESHROOM,         3500,   300,    0,      0,     100,     PROJECTILE_PEA},
     { SeedType::SEED_DOOMSHROOM,        3500,   300,    0,      0,     100,     PROJECTILE_PEA},
     { SeedType::SEED_LILYPAD,           0,      300,    0,      100,   0,       PROJECTILE_PEA},
-    { SeedType::SEED_SQUASH,            2000,   300,    1800,   0,     0,       PROJECTILE_PEA},
+    { SeedType::SEED_SQUASH,            2000,   300,    1800,   80,    0,       PROJECTILE_PEA},
     { SeedType::SEED_THREEPEATER,       0,      300,    20,     0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_TANGLEKELP,        2000,   300,    0,      100,   0,       PROJECTILE_PEA},
     { SeedType::SEED_JALAPENO,          3500,   300,    0,      0,     100,     PROJECTILE_PEA},
@@ -1505,7 +1505,7 @@ void Plant::UpdateSquash()
             mTargetZombieID = mBoard->ZombieGetID(aZombie);
             mTargetX = aZombie->ZombieTargetLeadX(0.0f) - mWidth / 2;
             mState = PlantState::STATE_SQUASH_LOOK;
-            mStateCountdown = 80;
+            mStateCountdown = GetPlantProperty(mSeedType).mStateCountdown;
             PlayBodyReanim(mTargetX < mX ? "anim_lookleft" : "anim_lookright", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 10, 24.0f);
             mApp->PlayFoley(FoleyType::FOLEY_SQUASH_HMM);
         }
