@@ -54,6 +54,7 @@ public:
     ZombieID                mTargetZombieID;        
     int                     mLastPortalX;  
     bool                    mIsZombie;
+    int                     mDamage;
 
 public:
     Projectile();

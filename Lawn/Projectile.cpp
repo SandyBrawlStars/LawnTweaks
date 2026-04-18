@@ -75,7 +75,9 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	mProjectileAge = 0;
 	mClickBackoffCounter = 0;
 	mAnimTicksPerFrame = 0;
+
 	mIsZombie = false;
+	mDamage = GetProjectileDef().mDamage;
 
 	if (mProjectileType == PROJECTILE_ZOMBIE_PEA)
 	{
@@ -288,6 +290,7 @@ void Projectile::CheckForCollision()
 
 	if (mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA || mIsZombie)
 	{
+		/* LawnTweaks - zombie projectiles hitting hypnotised zombies */
 		Plant* aPlant = FindCollisionTargetPlant();
 
 		Rect aProjectileRect = GetProjectileRect();
@@ -313,7 +316,7 @@ void Projectile::CheckForCollision()
 		if (aPlant)
 		{
 			const ProjectileDefinition& aProjectileDef = GetProjectileDef();
-			aPlant->mPlantHealth -= aProjectileDef.mDamage;
+			aPlant->mPlantHealth -= mDamage;
 			aPlant->mEatenFlashCountdown = max(aPlant->mEatenFlashCountdown, 25);
 
 			if (mProjectileType == PROJECTILE_ZOMBIE_PEA) {
@@ -325,7 +328,7 @@ void Projectile::CheckForCollision()
 		else if (aBestZombie)
 		{
 			const ProjectileDefinition& aProjectileDef = GetProjectileDef();
-			aBestZombie->TakeDamage(aProjectileDef.mDamage, 0U);
+			aBestZombie->TakeDamage(mDamage, 0U);
 
 			if (mProjectileType == PROJECTILE_ZOMBIE_PEA) {
 				mApp->AddTodParticle(mPosX - 3.0f, mPosY + 17.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_PEA_SPLAT);
@@ -485,8 +488,8 @@ void Projectile::DoSplashDamage(Zombie* theZombie)
 		}
 	}
 
-	int aOriginalDamage = aProjectileDef.mDamage;
-	int aSplashDamage = aProjectileDef.mDamage / 3;
+	int aOriginalDamage = mDamage;
+	int aSplashDamage = mDamage / 3;
 	int aMaxSplashDamageAmount = aSplashDamage * 7;
 	if (mProjectileType == ProjectileType::PROJECTILE_FIREBALL)
 	{
@@ -626,7 +629,7 @@ void Projectile::UpdateLobMotion()
 		}
 		else
 		{
-			aPlant->mPlantHealth -= GetProjectileDef().mDamage;
+			aPlant->mPlantHealth -= mDamage;
 			aPlant->mEatenFlashCountdown = max(aPlant->mEatenFlashCountdown, 25);
 			mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
 			Die();
@@ -847,7 +850,7 @@ void Projectile::DoImpact(Zombie* theZombie)
 	else if (theZombie)
 	{
 		unsigned int aDamageFlags = GetDamageFlags(theZombie);
-		theZombie->TakeDamage(GetProjectileDef().mDamage, aDamageFlags);
+		theZombie->TakeDamage(mDamage, aDamageFlags);
 	}
 
 	float aLastPosX = mPosX - mVelX;

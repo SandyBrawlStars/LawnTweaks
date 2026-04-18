@@ -1112,23 +1112,29 @@ void SeedPacket::SetPacketType(SeedType theSeedType, SeedType theImitaterType)
 		mApp->IsIZombieLevel() || mApp->IsScaryPotterLevel() || mApp->IsWhackAZombieLevel() || (mApp->IsSurvivalMode() && mBoard->mChallenge->mSurvivalStage > 0))
 		return;
 
-	if ((Plant::IsUpgrade(aUseSeedType) && !gLawnApp->IsSurvivalMode()) || Plant::GetRefreshTime(mPacketType, mImitaterType) == 5000)
+	/*
+	* Fast: 0
+	* Medium: 2000
+	* Long: 3500
+	*/
+	if (theSeedType == SeedType::SEED_IMITATER && theImitaterType != SeedType::SEED_NONE)
 	{
-		mRefreshTime = 3500;
+		const PlantProperty& aPlantDef = GetPlantProperty(theImitaterType);
+		mRefreshTime = aPlantDef.mStartingRefresh;
+	}
+	else
+	{
+		const PlantProperty& aPlantDef = GetPlantProperty(theSeedType);
+		mRefreshTime = aPlantDef.mStartingRefresh;
+	}
+
+	if (mRefreshTime > 0) {
 		mRefreshing = true;
 		mActive = false;
 	}
-	else if (Plant::IsUpgrade(aUseSeedType) && gLawnApp->IsSurvivalMode())
+	if (Plant::IsUpgrade(aUseSeedType) && gLawnApp->IsSurvivalMode())
 	{
 		mRefreshTime = 8000;
-		mRefreshing = true;
-		mActive = false;
-	}
-	else if (Plant::GetRefreshTime(mPacketType, mImitaterType) == 3000)
-	{
-		mRefreshTime = 2000;
-		mRefreshing = true;
-		mActive = false;
 	}
 }
 

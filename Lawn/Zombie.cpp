@@ -1258,6 +1258,7 @@ void Zombie::UpdateZombieBungee()
     if (IsDeadOrDying() || IsImmobilizied())
         return;
 
+    /* LawnTweaks - bungee zombie hypno interaction fix */
     if (mMindControlled) {
         mZombiePhase = ZombiePhase::PHASE_BUNGEE_RISING;
         mAltitude += 8.0f;
@@ -1422,6 +1423,7 @@ void Zombie::UpdateZombiePogo()
         return;
 
     Plant* aPlant = nullptr;
+    /* LawnTweaks - pogo zombie hypno interaction fix */
     if (IsOnBoard() && !mMindControlled)
     {
         aPlant = FindPlantTarget(ZombieAttackType::ATTACKTYPE_VAULT);
@@ -1483,6 +1485,7 @@ void Zombie::ZombieCatapultFire(Plant* thePlant)
 
 Plant* Zombie::FindCatapultTarget()
 {
+    /* LawnTweaks - catapult zombie hypno interaction fix */
     if (mMindControlled) return nullptr;
     Plant* aTarget = nullptr;
 
@@ -1668,6 +1671,7 @@ void Zombie::UpdateZombiePolevaulter()
         }
         else if (aZombie)
         {
+            /* LawnTweaks - polevaulter zombie hypno interactions */
             mZombiePhase = ZombiePhase::PHASE_POLEVAULTER_IN_VAULT;
             PlayZombieReanim("anim_jump", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, 24.0f);
 
@@ -2031,6 +2035,7 @@ void Zombie::UpdateZombieGargantuar()
         Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
         if (aBodyReanim->ShouldTriggerTimedEvent(0.64f))
         {
+            /* LawnTweaks - gargantuar hypno interactions */
             Zombie* aZombie = FindZombieTarget();
             if (aZombie)
             {
@@ -2172,6 +2177,7 @@ void Zombie::UpdateZombieGargantuar()
     {
         doSmash = true;
     }
+    /* LawnTweaks - gargantuar hypno targeting */
     if (FindZombieTarget())
     {
         doSmash = true;

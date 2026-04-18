@@ -7,8 +7,9 @@
 
 enum PlantSubClass
 {
-    SUBCLASS_NORMAL = 0,
-    SUBCLASS_SHOOTER = 1
+    SUBCLASS_NORMAL,
+    SUBCLASS_SHOOTER,
+    SUBCLASS_SUNPRODUCER
 };
 
 enum PlantWeapon
@@ -313,4 +314,22 @@ public:
 };
 extern PlantDefinition gPlantDefs[SeedType::NUM_SEED_TYPES];
 
+/*
+* Lawntweaks - Plant properties for easier stat modification!
+*/
+class PlantProperty
+{
+public:
+    SeedType                mSeedType;          // Identifier of the plant, ex: SEED_PEASHOOTER  
+    float                   mStartingRefresh;   // Starting refresh
+    int                     mToughness;         // Health of the plant
+    int                     mDamage;            // Damage the plant deals
+    int                     mStateCountdown;    // Countdown for plant states (chomper bites, sun shroom growth, etc)
+    int                     mDoSpecialCountdown;// Countdown for single use plants
+    ProjectileType          mProjectileType;    // Projectile type for shooters
+};
+extern PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES];
+
+
 /*inline*/ PlantDefinition& GetPlantDefinition(SeedType theSeedType);
+/*inline*/ PlantProperty& GetPlantProperty(SeedType theSeedType);

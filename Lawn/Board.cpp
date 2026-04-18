@@ -6608,7 +6608,7 @@ void Board::DrawGameObjects(Graphics* g)
 			{
 			case SEED_CHERRYBOMB: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
 			case SEED_POTATOMINE: plantMaxCounter = 1500; plantCounter = aPlant->mStateCountdown;  break;
-			case SEED_CHOMPER: plantMaxCounter = 2700; plantCounter = aPlant->mStateCountdown;	break;
+			case SEED_CHOMPER: plantMaxCounter = 4000; plantCounter = aPlant->mStateCountdown;	break;
 			case SEED_GRAVEBUSTER: plantMaxCounter = 400; plantCounter = aPlant->mStateCountdown;  break;
 			case SEED_ICESHROOM: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
 			case SEED_DOOMSHROOM: plantMaxCounter = 100; plantCounter = aPlant->mDoSpecialCountdown;  break;
