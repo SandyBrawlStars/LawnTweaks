@@ -12,6 +12,8 @@ Recommendation: Search /*LawnTweaks for comments on the changes in this decomp
 - Ice level with arrow key scrollable plant selection (trust its cool)
 - Seeing stars now has a starfruit counter like beghouled
 - Zombiefiable projectiles (litterally just a variable)
+- Hypno zombies fixes
+- Easier plant stat modification
 - Uhhh almanac shows specific plant cooldown and has options for some colors and stuff (input color names like {RED} or {LIGHTBLUE})
 (genuinly idk who cares i just added this here)
 
