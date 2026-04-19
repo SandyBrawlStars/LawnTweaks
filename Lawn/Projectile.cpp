@@ -1235,7 +1235,7 @@ void Projectile::ConvertToFireball(int theGridX)
 		aFirePeaReanim->OverrideScale(-1.0f, 1.0f);
 		aOffsetX += 80.0f;
 	}
-
+	mDamage *= 2;
 	aFirePeaReanim->SetPosition(mPosX + aOffsetX, mPosY + aOffsetY);
 	aFirePeaReanim->mLoopType = ReanimLoopType::REANIM_LOOP;
 	aFirePeaReanim->mAnimRate = RandRangeFloat(50.0f, 80.0f);
