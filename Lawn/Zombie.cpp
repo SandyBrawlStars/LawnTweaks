@@ -2356,7 +2356,7 @@ void Zombie::UpdateZombieGatlingHead()
         aBodyReanim->GetCurrentTransform(aTrackIndex, &aTransform);
 
         float aOriginX = mPosX + aTransform.mTransX - 9.0f;
-        float aOriginY = mPosY + aTransform.mTransY + 6.0f;
+        float aOriginY = mPosY + aTransform.mTransY + 6.0f + mAltitude;
         if (mMindControlled)  
         {
             aOriginX += 90.0f * mScaleZombie;

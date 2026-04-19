@@ -152,6 +152,8 @@ Plant* Projectile::FindCollisionTargetPlant()
 		if (mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA)
 		{
 			if (aPlant->mSeedType == SeedType::SEED_PUFFSHROOM ||
+				aPlant->mSeedType == SeedType::SEED_SEASHROOM ||
+				aPlant->mSeedType == SeedType::SEED_FLOWERPOT ||
 				aPlant->mSeedType == SeedType::SEED_SUNSHROOM ||
 				aPlant->mSeedType == SeedType::SEED_POTATOMINE ||
 				aPlant->mSeedType == SeedType::SEED_SPIKEWEED ||
