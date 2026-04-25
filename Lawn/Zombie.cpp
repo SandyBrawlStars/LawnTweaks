@@ -2045,7 +2045,7 @@ void Zombie::UpdateZombieGargantuar()
             else
             {
                 Plant* aPlant = FindPlantTarget(ZombieAttackType::ATTACKTYPE_CHEW);
-                if (aPlant)
+                if (aPlant && !mMindControlled)
                 {
                     if (aPlant->mSeedType == SeedType::SEED_SPIKEROCK)
                     {
@@ -2173,7 +2173,7 @@ void Zombie::UpdateZombieGargantuar()
     }
 
     bool doSmash = false;
-    if (FindPlantTarget(ZombieAttackType::ATTACKTYPE_CHEW))
+    if (FindPlantTarget(ZombieAttackType::ATTACKTYPE_CHEW) && !mMindControlled)
     {
         doSmash = true;
     }
