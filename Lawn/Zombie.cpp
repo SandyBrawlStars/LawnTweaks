@@ -1641,9 +1641,10 @@ void Zombie::UpdateZombiePolevaulter()
 {
     if (mZombiePhase == ZombiePhase::PHASE_POLEVAULTER_PRE_VAULT && mHasHead && mZombieHeight == ZombieHeight::HEIGHT_ZOMBIE_NORMAL)
     {
+        /* LawnTweaks - polevaulter zombie hypno interactions */
         Plant* aPlant = FindPlantTarget(ZombieAttackType::ATTACKTYPE_VAULT);
         Zombie* aZombie = FindZombieTarget();
-        if (aPlant)
+        if (aPlant && !mMindControlled)
         {
             if (mBoard->GetLadderAt(aPlant->mPlantCol, aPlant->mRow))
             {
@@ -1671,7 +1672,6 @@ void Zombie::UpdateZombiePolevaulter()
         }
         else if (aZombie)
         {
-            /* LawnTweaks - polevaulter zombie hypno interactions */
             mZombiePhase = ZombiePhase::PHASE_POLEVAULTER_IN_VAULT;
             PlayZombieReanim("anim_jump", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, 24.0f);
 
@@ -2356,7 +2356,7 @@ void Zombie::UpdateZombieGatlingHead()
         aBodyReanim->GetCurrentTransform(aTrackIndex, &aTransform);
 
         float aOriginX = mPosX + aTransform.mTransX - 9.0f;
-        float aOriginY = mPosY + aTransform.mTransY + 6.0f + mAltitude;
+        float aOriginY = mPosY + aTransform.mTransY + 6.0f + (mInPool ? 25 : 0);
         if (mMindControlled)  
         {
             aOriginX += 90.0f * mScaleZombie;
