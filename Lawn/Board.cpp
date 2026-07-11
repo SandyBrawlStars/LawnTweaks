@@ -189,6 +189,8 @@ Board::Board(LawnApp* theApp)
 	mDebugObjectType = 0;
 	mDebugObjectLimit = 0;
 
+	JsonLoaderBoard();
+
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
 	{
 		mMenuButton->SetLabel(_S("[MAIN_MENU_BUTTON]"));
@@ -274,6 +276,51 @@ Board::~Board()
 	delete mCutScene;
 	delete mChallenge;
 	mApp->UpdateDiscordState();
+
+	JsonLoaderBoard();
+}
+
+void JsonLoaderBoard()
+{
+	FILE* file = std::fopen("LawnTweaks/PlantProps.json", "rb");
+	if (file)
+	{
+		char readBuffer[65536];
+		rapidjson::FileReadStream is(file, readBuffer, sizeof(readBuffer));
+
+		rapidjson::MemoryPoolAllocator<> allocator;
+		rapidjson::Document mPlantJson(&allocator);
+
+		mPlantJson.ParseStream(is);
+
+		std::fclose(file);
+		if (!mPlantJson.HasParseError()) {
+			for (int i = 0; i < NUM_SEED_TYPES; i++)
+			{
+				if (mPlantJson.HasMember(gPlantDefs[i].mPlantName))
+				{
+					if (mPlantJson[gPlantDefs[i].mPlantName].HasMember("SunCost") && mPlantJson[gPlantDefs[i].mPlantName]["SunCost"].IsInt())
+					{
+						gPlantDefs[i].mSeedCost = mPlantJson[gPlantDefs[i].mPlantName]["SunCost"].GetInt();
+					}
+					if (mPlantJson[gPlantDefs[i].mPlantName].HasMember("StartingRecharge"))
+					{
+						if (mPlantJson[gPlantDefs[i].mPlantName]["StartingRecharge"].IsInt())
+							gPlantProps[i].mStartingRefresh = mPlantJson[gPlantDefs[i].mPlantName]["StartingRecharge"].GetInt() * 100;
+						else if (mPlantJson[gPlantDefs[i].mPlantName]["StartingRecharge"].IsFloat())
+							gPlantProps[i].mStartingRefresh = mPlantJson[gPlantDefs[i].mPlantName]["StartingRecharge"].GetFloat() * 100.0f;
+					}
+					if (mPlantJson[gPlantDefs[i].mPlantName].HasMember("Recharge"))
+					{
+						if (mPlantJson[gPlantDefs[i].mPlantName]["Recharge"].IsInt())
+							gPlantDefs[i].mRefreshTime = mPlantJson[gPlantDefs[i].mPlantName]["Recharge"].GetInt() * 100;
+						else if (mPlantJson[gPlantDefs[i].mPlantName]["Recharge"].IsFloat())
+							gPlantDefs[i].mRefreshTime = mPlantJson[gPlantDefs[i].mPlantName]["Recharge"].GetFloat() * 100.0f;
+					}
+				}
+			}
+		}
+	}
 }
 
 void BoardInitForPlayer()
@@ -6632,7 +6679,15 @@ void Board::DrawGameObjects(Graphics* g)
 				{
 					barOffsetY += barHeight + baseBarOffsetY;
 				}
-				DrawHealthbarMini(g, rect, maxColor, aPlant->mPlantMaxHealth, baseColor, aPlant->mPlantHealth, barWidth, barHeight, (aPlant->mSeedType != SeedType::SEED_IMITATER && isPumpkin) || aPlant->mSeedType == SeedType::SEED_TALLNUT ? 10 : 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				if (aPlant->mPlantHealth > aPlant->mPlantMaxHealth && aPlant->mPlantHealth <= aPlant->mPlantMaxHealth + aPlant->mOverhealAmount)
+				{
+					DrawHealthbarMini(g, rect, maxColor, aPlant->mPlantHealth, baseColor, aPlant->mPlantHealth, barWidth, barHeight, (aPlant->mSeedType != SeedType::SEED_IMITATER && isPumpkin) || aPlant->mSeedType == SeedType::SEED_TALLNUT ? 10 : 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+					DrawHealthbarMini(g, rect, Color(0, 0,0 ,0), aPlant->mOverhealAmount, Color(0, 0, 255, 100), aPlant->mPlantHealth - aPlant->mPlantMaxHealth, barWidth, barHeight, (aPlant->mSeedType != SeedType::SEED_IMITATER && isPumpkin) || aPlant->mSeedType == SeedType::SEED_TALLNUT ? 10 : 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline, true);
+				}
+				else
+				{
+					DrawHealthbarMini(g, rect, maxColor, aPlant->mPlantMaxHealth, baseColor, aPlant->mPlantHealth, barWidth, barHeight, (aPlant->mSeedType != SeedType::SEED_IMITATER && isPumpkin) || aPlant->mSeedType == SeedType::SEED_TALLNUT ? 10 : 0, barOffsetY, textColor, FONT_BRIANNETOD12, textOffsetY, Color(0, 0, 0, 200), textOutlineOffset, drawBarOutline);
+				}
 			}
 			if (mApp->mExtraBars)
 			{
@@ -9591,6 +9646,13 @@ void Board::KillAllPlantsInRadius(int theX, int theY, int theRadius)
 	{
 		if (GetCircleRectOverlap(theX, theY, theRadius, aPlant->GetPlantRect()))
 		{
+			if (aPlant->mExplodedDamage >= 0)
+			{
+				aPlant->mPlantHealth -= aPlant->mExplodedDamage;
+				aPlant->mRecentlyEatenCountdown = 50;
+				aPlant->mEatenFlashCountdown = 50;
+				continue;
+			}
 			mPlantsEaten++;
 			aPlant->Die();
 		}
@@ -9918,7 +9980,7 @@ bool Board::PlantingRequirementsMet(SeedType theSeedType)
 	}
 }
 
-void Board::KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags)
+void Board::KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags, int theDamage)
 {
 	Zombie* aZombie = nullptr;
 	while (IterateZombies(aZombie))
@@ -9934,13 +9996,13 @@ void Board::KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius
 
 			if (aRowDist <= theRowRange && aRowDist >= -theRowRange && GetCircleRectOverlap(theX, theY, theRadius, aZombieRect))
 			{
-				if (theBurn)
+				if (theBurn && aZombie->mBodyHealth < theDamage)
 				{
 					aZombie->ApplyBurn();
 				}
 				else
 				{
-					aZombie->TakeDamage(1800, 18U);
+					aZombie->TakeDamage(theDamage, 18U);
 				}
 			}
 		}
@@ -10178,7 +10240,7 @@ void Board::DrawHealthbar(Graphics* g, Rect rect, Color maxColor, int maxNumber,
 }
 
 /*LawnTweaks - the difference is its transparent, doesnt draw the max, text is in the bar instead of floating above*/
-void Board::DrawHealthbarMini(Graphics* g, Rect rect, Color maxColor, int maxNumber, Color baseColor, int baseNumber, int barWidth, int barHeight, int barOffsetX, int barOffsetY, Color textColor, Font* textFont, int textOffsetY, Color textOutlineColor, int textOutlineOffset, bool drawBarOutline)
+void Board::DrawHealthbarMini(Graphics* g, Rect rect, Color maxColor, int maxNumber, Color baseColor, int baseNumber, int barWidth, int barHeight, int barOffsetX, int barOffsetY, Color textColor, Font* textFont, int textOffsetY, Color textOutlineColor, int textOutlineOffset, bool drawBarOutline, bool deletenum)
 {
 	int barX = rect.mX + (rect.mWidth - barWidth) / 2 - barOffsetX;
 	int barY = rect.mY - barHeight - barOffsetY;
@@ -10196,6 +10258,7 @@ void Board::DrawHealthbarMini(Graphics* g, Rect rect, Color maxColor, int maxNum
 	}
 	g->SetColor(lastColor);
 	SexyString text = StrFormat(_S("%d"), baseNumber);
+	if (deletenum) return;
 	TodDrawString(g, text, barX + (barWidth / 2) + textOutlineOffset, barY + textOutlineOffset + 10, textFont, textOutlineColor, DS_ALIGN_CENTER);
 	TodDrawString(g, text, barX + (barWidth / 2), barY + 10, textFont, textColor, DS_ALIGN_CENTER);
 }

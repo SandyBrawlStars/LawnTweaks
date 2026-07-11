@@ -1043,6 +1043,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Cursor13.cur" />
+    <None Include="..\Debug\LawnTweaks\PlantProps.json" />
     <None Include="BltRotatedHelper.inc" />
     <None Include="DDI_Additive.inc" />
     <None Include="DDI_AlphaBlt.inc" />

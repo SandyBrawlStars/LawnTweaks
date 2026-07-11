@@ -88,4 +88,7 @@ public:
 
 };
 
+/*LawnTweaks - functions and stuff*/
+int ProjectileFromName(const char *name);
+
 #endif

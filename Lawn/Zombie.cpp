@@ -6888,6 +6888,12 @@ void Zombie::EatPlant(Plant* thePlant)
     }
 
     thePlant->mPlantHealth -= DAMAGE_PER_EAT;
+
+    if (thePlant->mDamageReflectPercent > 0.0f)
+    {
+        TakeDamage(DAMAGE_PER_EAT * thePlant->mDamageReflectPercent, 0U);
+    }
+
     thePlant->mRecentlyEatenCountdown = 50;
     if (mApp->IsIZombieLevel() && mJustGotShotCounter < -500)
     {

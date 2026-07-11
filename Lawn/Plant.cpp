@@ -77,12 +77,13 @@ PlantDefinition gPlantDefs[SeedType::NUM_SEED_TYPES] = {
     { SeedType::SEED_LEFTPEATER,        nullptr, ReanimationType::REANIM_REPEATER,      5,  200,    750,    PlantSubClass::SUBCLASS_SHOOTER,    150,    _S("REPEATER") }
 };
 
+//These are the default stats, change the ones in PlantProps.json
 PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
     { SeedType::SEED_PEASHOOTER,        0,      300,    20,     0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_SUNFLOWER,         0,      300,    0,      0,     0,       PROJECTILE_PEA},
-    { SeedType::SEED_CHERRYBOMB,        3500,   300,    0,      0,     100,     PROJECTILE_PEA},
+    { SeedType::SEED_CHERRYBOMB,        3500,   300,    1800,   0,     100,     PROJECTILE_PEA},
     { SeedType::SEED_WALLNUT,           2000,   4000,   0,      0,     0,       PROJECTILE_PEA},
-    { SeedType::SEED_POTATOMINE,        2000,   300,    0,      1500,  0,       PROJECTILE_PEA},
+    { SeedType::SEED_POTATOMINE,        2000,   300,    1800,   1500,  0,       PROJECTILE_PEA},
     { SeedType::SEED_SNOWPEA,           0,      300,    20,     0,     0,       PROJECTILE_SNOWPEA},
     { SeedType::SEED_CHOMPER,           0,      300,    40,     4000,  0,       PROJECTILE_PEA},
     { SeedType::SEED_REPEATER,          0,      300,    20,     0,     0,       PROJECTILE_PEA},
@@ -91,9 +92,9 @@ PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
     { SeedType::SEED_FUMESHROOM,        0,      300,    20,     0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_GRAVEBUSTER,       0,      300,    0,      400,   0,       PROJECTILE_PEA},
     { SeedType::SEED_HYPNOSHROOM,       2000,   300,    0,      0,     0,       PROJECTILE_PEA},
-    { SeedType::SEED_SCAREDYSHROOM,     0,      300,    0,      0,     0,       PROJECTILE_PUFF},
+    { SeedType::SEED_SCAREDYSHROOM,     0,      300,    20,     0,     0,       PROJECTILE_PUFF},
     { SeedType::SEED_ICESHROOM,         3500,   300,    0,      0,     100,     PROJECTILE_PEA},
-    { SeedType::SEED_DOOMSHROOM,        3500,   300,    0,      0,     100,     PROJECTILE_PEA},
+    { SeedType::SEED_DOOMSHROOM,        3500,   300,    0,      1800,  100,     PROJECTILE_PEA},
     { SeedType::SEED_LILYPAD,           0,      300,    0,      100,   0,       PROJECTILE_PEA},
     { SeedType::SEED_SQUASH,            2000,   300,    1800,   80,    0,       PROJECTILE_PEA},
     { SeedType::SEED_THREEPEATER,       0,      300,    20,     0,     0,       PROJECTILE_PEA},
@@ -125,13 +126,66 @@ PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
     { SeedType::SEED_WINTERMELON,       3500,   300,    80,     0,     0,       PROJECTILE_WINTERMELON},
     { SeedType::SEED_GOLD_MAGNET,       3500,   300,    0,      200,   0,       PROJECTILE_PEA},
     { SeedType::SEED_SPIKEROCK,         3500,   450,    20,     100,   0,       PROJECTILE_PEA},
-    { SeedType::SEED_COBCANNON,         3500,   300,    200,    3000,  0,       PROJECTILE_COBBIG},
+    { SeedType::SEED_COBCANNON,         3500,   300,    1800,   3000,  0,       PROJECTILE_COBBIG},
     { SeedType::SEED_IMITATER,          0,      300,    0,      200,   0,       PROJECTILE_PEA},
-    { SeedType::SEED_EXPLODE_O_NUT,     2000,   4000,   0,      0,     0,       PROJECTILE_PEA},
+    { SeedType::SEED_EXPLODE_O_NUT,     2000,   4000,   0,      1800,  0,       PROJECTILE_PEA},
     { SeedType::SEED_GIANT_WALLNUT,     2000,   4000,   0,      0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_SPROUT,            2000,   300,    0,      0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_LEFTPEATER,        0,      300,    20,     0,     0,       PROJECTILE_PEA},
 };
+
+/*
+* Feature reminders
+* PlantProps:
+* - ProjectileWeightedList: {} using tod weighted array
+* ProjectileSpread: array of dicts, key is projectile, value is angle, projectile set to ANY is default plant projectile
+* - Explosives: RowRange and XRange
+* Subclass
+* UpgradeTo
+* - Chomper: IsBiting
+* For Shooters: IsHoming
+* - CrushedDamage
+* - ExplodedDamage
+* IsSleeping
+* - Color
+* PlantOrder? 
+* Squash - Amount of jumps
+* 
+* ZombieProps:
+* Toughness
+* Armor Toughness
+* Armor
+* Shield
+* Shield Toughness
+* WalkSpeed
+* ImmuneToFreeze
+* ImmuneToChill
+* CannotBeSwallowed
+* PointCost
+* Weight
+* MinimumWave
+* FirstLevel
+* EatDamageMult
+* ProjectileDamage
+* 
+* ProjectileProps:
+* TimeBeforeDelete
+* SpeedMult
+* FireIgnitedType
+* PlantToSpawn
+* Hypnotise
+* ChillDuration
+* ButterDuration
+* FreezeDuration
+* Knockback
+* SplashDamage
+* SplashRadius
+* Scale
+* 
+* Pierce
+* DamageType - Normal, Fire (disables chill), or Explosive (ash animation when zombie dies)
+* 
+*/
 
 Plant::Plant()
 {
@@ -162,6 +216,49 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
     mSquished = false;
     mSeedType = theSeedType;
     mImitaterType = theImitaterType;
+
+    mActionRateRand = 15;
+    mSunAmount = 1;
+    mSunValue = 25;
+    mSunValueGrown = 25;
+    mPreAttackShots = 0;
+    mPreAttackPeriod = 25;
+    
+    mPlantAge = 0;
+    mHealPeriod = 0;
+    mHealAmount = 0;
+    mOverhealAmount = 0;
+    mRangeMult = 1;
+    mPlantScale = 1.0f;
+
+    mDamageReflectPercent = 0.0f;
+    mCrushedDamage = -1;
+    mExplodedDamage = -1;
+
+    mButterChance = 0.25;
+    mSecondaryDamage = GetPlantProperty(mSeedType).mDamage;
+    mSecondaryType = GetPlantProperty(mSeedType).mProjectileType;
+
+    switch (mSeedType)
+    {
+    case SEED_TWINSUNFLOWER:
+        mSunAmount = 2;
+        break;
+    case SEED_KERNELPULT:
+        mSecondaryType = PROJECTILE_KERNEL;
+        break;
+    case SEED_REPEATER:
+    case SEED_SPLITPEA:
+    case SEED_LEFTPEATER:
+        mPreAttackShots = 1;
+        break;
+    case SEED_SUNSHROOM:
+        mSunValue = 15;
+        break;
+    }
+
+    LoadJsonStats();
+
     mPlantHealth = GetPlantProperty(mSeedType).mToughness;
     mDoSpecialCountdown = GetPlantProperty(mSeedType).mDoSpecialCountdown;
     mDisappearCountdown = 200;
@@ -221,7 +318,7 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
     if (mLaunchRate > 0)
     {
         if (MakesSun())
-            mLaunchCounter = RandRangeInt(300, mLaunchRate / 2);
+            mLaunchCounter = RandRangeInt(mLaunchRate / 8.33, mLaunchRate / 2);
         else
             mLaunchCounter = RandRangeInt(0, mLaunchRate);
     }
@@ -772,10 +869,10 @@ bool Plant::FindTargetAndFire(int theRow, PlantWeapon thePlantWeapon)
         aHeadReanim->SetFramesForLayer("anim_shooting");
 
         mShootingCounter = 33;
-        if (mSeedType == SeedType::SEED_REPEATER || mSeedType == SeedType::SEED_SPLITPEA || mSeedType == SeedType::SEED_LEFTPEATER)
+        if (mPreAttackPeriod > 0 && mPreAttackShots > 0)
         {
             aHeadReanim->mAnimRate = 45.0f;
-            mShootingCounter = 26;
+            mShootingCounter = mPreAttackPeriod + 1;
         }
         else if (mSeedType == SeedType::SEED_GATLINGPEA)
         {
@@ -812,7 +909,7 @@ bool Plant::FindTargetAndFire(int theRow, PlantWeapon thePlantWeapon)
         case SeedType::SEED_WINTERMELON:    mShootingCounter = 36;  break;
         case SeedType::SEED_KERNELPULT:
         {
-            if (Sexy::Rand(4) == 0)
+            if (mButterChance > 0.0f && RandRangeInt(0, 100) <= mButterChance)
             {
                 aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
                 aBodyReanim->AssignRenderGroupToPrefix("Cornpult_butter", RENDER_GROUP_NORMAL);
@@ -825,6 +922,10 @@ bool Plant::FindTargetAndFire(int theRow, PlantWeapon thePlantWeapon)
         }
         case SeedType::SEED_CACTUS:         mShootingCounter = 35;  break;
         default:                            mShootingCounter = 29;  break;
+        }
+        if (mPreAttackPeriod > 0 && mPreAttackShots > 0)
+        {
+            mShootingCounter = mPreAttackPeriod + 1;
         }
     }
     else
@@ -963,7 +1064,7 @@ void Plant::UpdateShooter()
     mLaunchCounter--;
     if (mLaunchCounter <= 0)
     {
-        mLaunchCounter = mLaunchRate - Sexy::Rand(15);
+        mLaunchCounter = mLaunchRate - (mActionRateRand > 0.0f ? Sexy::Rand(mActionRateRand) : 0);
 
         if (mSeedType == SeedType::SEED_THREEPEATER)
         {
@@ -998,16 +1099,28 @@ void Plant::UpdateShooter()
     {
         FindTargetAndFire(mRow, PlantWeapon::WEAPON_PRIMARY);
     }
-    if (mLaunchCounter == 25)
+    if (mPreAttackShots > 0 && mPreAttackPeriod > 0 && mLaunchCounter % mPreAttackPeriod == 0 && mLaunchCounter <= mPreAttackShots * mPreAttackPeriod)
     {
-        if (mSeedType == SeedType::SEED_REPEATER || mSeedType == SeedType::SEED_LEFTPEATER)
+        if (mState == PlantState::STATE_CACTUS_HIGH)
         {
             FindTargetAndFire(mRow, PlantWeapon::WEAPON_PRIMARY);
         }
         else if (mSeedType == SeedType::SEED_SPLITPEA)
         {
-            FindTargetAndFire(mRow, PlantWeapon::WEAPON_PRIMARY);
             FindTargetAndFire(mRow, PlantWeapon::WEAPON_SECONDARY);
+            FindTargetAndFire(mRow, PlantWeapon::WEAPON_PRIMARY);
+        }
+        else if (mSeedType == SeedType::SEED_STARFRUIT)
+        {
+            LaunchStarFruit();
+        }
+        else if (mSeedType == SeedType::SEED_THREEPEATER)
+        {
+            LaunchThreepeater();
+        }
+        else
+        {
+            FindTargetAndFire(mRow, PlantWeapon::WEAPON_PRIMARY);
         }
     }
 }
@@ -1047,28 +1160,27 @@ void Plant::UpdateProductionPlant()
     }
     if (mLaunchCounter <= 0)
     {
-        mLaunchCounter = RandRangeInt(mLaunchRate - 150, mLaunchRate);
+        mLaunchCounter = RandRangeInt(mLaunchRate - mActionRateRand, mLaunchRate);
         mApp->PlayFoley(FoleyType::FOLEY_SPAWN_SUN);
 
         if (mSeedType == SeedType::SEED_SUNSHROOM)
         {
             if (mState == PlantState::STATE_SUNSHROOM_SMALL)
             {
-                mBoard->AddCoin(mX, mY, CoinType::COIN_SMALLSUN, CoinMotion::COIN_MOTION_FROM_PLANT);
+                CreateSun(mSunAmount, mSunValue);
             }
             else
             {
-                mBoard->AddCoin(mX, mY, CoinType::COIN_SUN, CoinMotion::COIN_MOTION_FROM_PLANT);
+                CreateSun(mSunAmount, mSunValueGrown);
             }
         }
         else if (mSeedType == SeedType::SEED_SUNFLOWER)
         {
-            mBoard->AddCoin(mX, mY, CoinType::COIN_SUN, CoinMotion::COIN_MOTION_FROM_PLANT);
+            CreateSun(mSunAmount, mSunValue);
         }
         else if (mSeedType == SeedType::SEED_TWINSUNFLOWER)
         {
-            mBoard->AddCoin(mX, mY, CoinType::COIN_SUN, CoinMotion::COIN_MOTION_FROM_PLANT);
-            mBoard->AddCoin(mX, mY, CoinType::COIN_SUN, CoinMotion::COIN_MOTION_FROM_PLANT);
+            CreateSun(mSunAmount, mSunValue);
         }
         else if (mSeedType == SeedType::SEED_MARIGOLD)
         {
@@ -1079,7 +1191,7 @@ void Plant::UpdateProductionPlant()
         {
             if (mSeedType == SeedType::SEED_SUNFLOWER)
             {
-                mBoard->AddCoin(mX, mY, CoinType::COIN_SUN, CoinMotion::COIN_MOTION_FROM_PLANT);
+                CreateSun(mSunAmount, mSunValue);
             }
             else if (mSeedType == SeedType::SEED_MARIGOLD)
             {
@@ -1305,7 +1417,7 @@ void Plant::UpdateSpikeweed()
         }
         else if (mSeedType == SeedType::SEED_SPIKEROCK)
         {
-            if (mStateCountdown == 69 || mStateCountdown == 33)
+            if (mStateCountdown == int(GetPlantProperty(mSeedType).mStateCountdown / 1.44) || mStateCountdown == int(GetPlantProperty(mSeedType).mStateCountdown / 3))
             {
                 DoRowAreaDamage(GetPlantProperty(mSeedType).mDamage, 33U);
             }
@@ -2353,6 +2465,15 @@ void Plant::Squish()
     if (mSeedType == SeedType::SEED_SQUASH && mState != PlantState::STATE_NOTREADY)
         return;
 
+    if (mCrushedDamage >= 0 && mPlantHealth > mCrushedDamage)
+    {
+        mPlantHealth -= mCrushedDamage;
+        mRecentlyEatenCountdown = 50;
+        mEatenFlashCountdown = 50;
+
+        return;
+    }
+
     mRenderOrder = Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_GRAVE_STONE, mRow, 8);
     mSquished = true;
     mDisappearCountdown = 500;
@@ -2421,7 +2542,7 @@ void Plant::UpdateBowling()
             mApp->PlaySample(SOUND_BOWLINGIMPACT2);
 
             int aDamageRangeFlags = GetDamageRangeFlags(PlantWeapon::WEAPON_PRIMARY) | 32U;
-            mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 90, 1, true, aDamageRangeFlags);
+            mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 90, 1, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
             mApp->AddTodParticle(aPosX, aPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_POWIE);
             mBoard->ShakeBoard(3, -4);
 
@@ -2527,6 +2648,15 @@ void Plant::UpdateAbilities()
 {
     if (!IsInPlay())
         return;
+
+    if (mHealPeriod > 0 && mPlantAge % mHealPeriod == 0)
+    {
+        mPlantHealth += mHealAmount;
+        if (mPlantHealth > mPlantMaxHealth + mOverhealAmount)
+        {
+            mPlantHealth = mPlantMaxHealth + mOverhealAmount;
+        }
+    }
 
     if (mState == PlantState::STATE_DOINGSPECIAL || mSquished)
     {
@@ -2789,6 +2919,8 @@ void Plant::UpdateReanim()
         aOffsetX += 12.0f;
         aOffsetY += 12.0f;
     }
+    aScaleX *= mPlantScale;
+    aScaleY *= mPlantScale;
     if (mState == PlantState::STATE_GRAVEBUSTER_EATING)
     {
         aOffsetY += TodAnimateCurveFloat(400, 0, mStateCountdown, 0.0f, 30.0f, TodCurves::CURVE_LINEAR);
@@ -2879,6 +3011,7 @@ void Plant::Update()
 
     if (doUpdate)
     {
+        mPlantAge++;
         UpdateAbilities();
         Animate();
 
@@ -3931,6 +4064,14 @@ void Plant::DrawShadow(Sexy::Graphics* g, float theOffsetX, float theOffsetY)
         aScale = 1.7f;
     }
 
+    aScale *= mPlantScale;
+    aShadowOffsetX *= mPlantScale;
+    if (mPlantScale < 1.0f) aShadowOffsetX -= 10.0f / mPlantScale;
+    if (mPlantScale >  1.0f) aShadowOffsetX += 13.0f * mPlantScale;
+    aShadowOffsetY *= mPlantScale;
+    if (mPlantScale < 1.0f) aShadowOffsetY -= 2.0f / mPlantScale;
+    if (mPlantScale > 1.0f) aShadowOffsetY += 6.0f * mPlantScale;
+
     if (Plant::IsFlying(mSeedType))
     {
         aShadowOffsetY += 10.0f;
@@ -4324,7 +4465,7 @@ void Plant::DoSpecial()
         {
             mApp->GetAchievement(ACHIEVEMENT_EXPLODONATOR);
         }
-        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 115, 1, true, aDamageRangeFlags);
+        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 115, 1, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
 
 
         mApp->AddTodParticle(aPosX, aPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_POWIE);
@@ -4337,7 +4478,7 @@ void Plant::DoSpecial()
     {
         mApp->PlaySample(SOUND_DOOMSHROOM);
 
-        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 250, 3, true, aDamageRangeFlags);
+        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 250, 3, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
         KillAllPlantsNearDoom();
 
         mApp->AddTodParticle(aPosX, aPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_DOOM);
@@ -4388,7 +4529,7 @@ void Plant::DoSpecial()
         aPosY = mY + mHeight / 2;
 
         mApp->PlaySample(SOUND_POTATO_MINE);
-        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 60, 0, false, aDamageRangeFlags);
+        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 60, 0, false, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
         if(!mApp->IsIZombieLevel() && !mApp->mPlayedQuickplay)
             mApp->GetAchievement(AchievementType::ACHIEVEMENT_SPUDOW);
 
@@ -4506,9 +4647,9 @@ void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon
     }
 
     ProjectileType aProjectileType = GetPlantProperty(mSeedType).mProjectileType;
-    if (mSeedType == SeedType::SEED_KERNELPULT && thePlantWeapon == PlantWeapon::WEAPON_SECONDARY)
+    if (thePlantWeapon == PlantWeapon::WEAPON_SECONDARY)
     {
-        aProjectileType = ProjectileType::PROJECTILE_BUTTER;
+        aProjectileType = mSecondaryType;
     }
 
     mApp->PlayFoley(FoleyType::FOLEY_THROW);
@@ -4654,8 +4795,10 @@ void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon
     {
         aProjectile->ConvertToFireball(mPlantCol);
     }
-    if (!(mSeedType == SeedType::SEED_KERNELPULT && thePlantWeapon == PlantWeapon::WEAPON_SECONDARY))
+    if (!(thePlantWeapon == PlantWeapon::WEAPON_SECONDARY))
         aProjectile->mDamage = GetPlantProperty(mSeedType).mDamage;
+    else
+        aProjectile->mDamage = mSecondaryDamage;
 
     if (mSeedType == SeedType::SEED_CABBAGEPULT || mSeedType == SeedType::SEED_KERNELPULT ||
         mSeedType == SeedType::SEED_MELONPULT || mSeedType == SeedType::SEED_WINTERMELON)
@@ -5127,6 +5270,9 @@ Rect Plant::GetPlantRect()
         aRect = Rect(mX + 10, mY, mWidth - 20, mHeight);
     }
 
+    aRect.mWidth *= mPlantScale;
+    aRect.mHeight *= mPlantScale;
+
     return aRect;
 }
 
@@ -5159,6 +5305,7 @@ Rect Plant::GetPlantAttackRect(PlantWeapon thePlantWeapon)
     default:                            aRect = Rect(mX + 60,       mY,             BOARD_WIDTH,        mHeight);               break;
     }
 
+    aRect.mWidth *= mRangeMult;
     return aRect;
 }
 
@@ -5198,6 +5345,145 @@ void Plant::PlayIdleAnim(float theRate)
         if (mApp->IsIZombieLevel())
         {
             aBodyReanim->mAnimRate = 0.0f;
+        }
+    }
+}
+
+void Plant::LoadJsonStats()
+{
+    FILE* file = std::fopen("LawnTweaks/PlantProps.json", "rb");
+    if (!file)
+    {
+        return;
+    }
+
+    char readBuffer[65536];
+    rapidjson::FileReadStream is(file, readBuffer, sizeof(readBuffer));
+
+    rapidjson::Document doc;
+    doc.ParseStream(is);
+
+    std::fclose(file);
+    if (doc.HasParseError()) { return; }
+
+    if (doc.HasMember(gPlantDefs[mSeedType].mPlantName))
+    {
+        // Int
+        LoadJsonStat("Toughness", doc, &gPlantProps[mSeedType].mToughness);
+        LoadJsonStat("StartingRecharge", doc, &gPlantProps[mSeedType].mStartingRefresh, 100);
+        LoadJsonStat("SpecialCountdown", doc, &gPlantProps[mSeedType].mDoSpecialCountdown, 100);
+        LoadJsonStat("StateCountdown", doc, &gPlantProps[mSeedType].mStateCountdown, 100);
+        LoadJsonStat("Recharge", doc, &gPlantDefs[mSeedType].mRefreshTime, 100);
+        LoadJsonStat("Damage", doc, &gPlantProps[mSeedType].mDamage);
+        LoadJsonStat("SunCost", doc, &gPlantDefs[mSeedType].mSeedCost);
+
+        LoadJsonStat("ActionRate", doc, &gPlantDefs[mSeedType].mLaunchRate, 100);
+        LoadJsonStat("ActionRateRand", doc, &mActionRateRand, 100);
+
+        LoadJsonStat("SunValue", doc, &mSunValue);
+        LoadJsonStat("SunAmount", doc, &mSunAmount);
+        LoadJsonStat("SunValueGrown", doc, &mSunValueGrown);
+
+        LoadJsonStat("PreAttackShots", doc, &mPreAttackShots);
+        LoadJsonStat("PreAttackPeriod", doc, &mPreAttackPeriod, 100);
+
+        LoadJsonStat("HealAmount", doc, &mHealAmount);
+        LoadJsonStat("OverhealAmount", doc, &mOverhealAmount);
+        LoadJsonStat("HealPeriod", doc, &mHealPeriod, 100);
+
+        LoadJsonStat("SecondaryDamage", doc, &mSecondaryDamage);
+
+        LoadJsonStat("CrushedDamage", doc, &mCrushedDamage);
+        LoadJsonStat("ExplodedDamage", doc, &mExplodedDamage);
+        
+        // Float
+        float aOffsetX = 0.0f, aOffsetY = 0.0f;
+
+        LoadJsonStatFloat("RangeMult", doc, &mRangeMult);
+        LoadJsonStatFloat("Scale", doc, &mPlantScale);
+        LoadJsonStatFloat("DamageReflectPercent", doc, &mDamageReflectPercent);
+        LoadJsonStatFloat("ButterChance", doc, &mButterChance, 10.0f);
+
+        LoadJsonStatFloat("OffsetX", doc, &aOffsetX);
+        LoadJsonStatFloat("OffsetY", doc, &aOffsetY);
+        mX += aOffsetX, mY += aOffsetY;
+
+        // Strings
+        LoadJsonStatProjectile("Projectile", doc, &gPlantProps[mSeedType].mProjectileType);
+        LoadJsonStatProjectile("SecondaryProjectile", doc, &mSecondaryType);
+    }
+}
+
+void Plant::LoadJsonStatProjectile(const char* name, rapidjson::Document& doc, ProjectileType* var)
+{
+    if (doc[gPlantDefs[mSeedType].mPlantName].HasMember(name) && doc[gPlantDefs[mSeedType].mPlantName][name].IsString())
+    {
+        int result = ProjectileFromName(doc[gPlantDefs[mSeedType].mPlantName][name].GetString());
+        if (result != -1)
+        {
+            *var = static_cast<ProjectileType>(result);
+        }
+    }
+}
+
+void Plant::LoadJsonStat(const char* name, rapidjson::Document &doc, int *var, float mult)
+{
+    if (doc[gPlantDefs[mSeedType].mPlantName].HasMember(name) && doc[gPlantDefs[mSeedType].mPlantName][name].IsInt())
+    {
+        *var = doc[gPlantDefs[mSeedType].mPlantName][name].GetInt() * int(mult);
+    }
+    else if (doc[gPlantDefs[mSeedType].mPlantName].HasMember(name) && doc[gPlantDefs[mSeedType].mPlantName][name].IsFloat())
+    {
+        *var = doc[gPlantDefs[mSeedType].mPlantName][name].GetFloat() * mult;
+    }
+}
+
+void Plant::LoadJsonStatFloat(const char* name, rapidjson::Document& doc, float* var, float mult)
+{
+    if (doc[gPlantDefs[mSeedType].mPlantName].HasMember(name) && doc[gPlantDefs[mSeedType].mPlantName][name].IsInt())
+    {
+        *var = doc[gPlantDefs[mSeedType].mPlantName][name].GetInt() * int(mult);
+    }
+    else if (doc[gPlantDefs[mSeedType].mPlantName].HasMember(name) && doc[gPlantDefs[mSeedType].mPlantName][name].IsFloat())
+    {
+        *var = doc[gPlantDefs[mSeedType].mPlantName][name].GetFloat() * mult;
+    }
+}
+
+void Plant::CreateSun(int amount, int value)
+{
+    for (int i = 0; i < amount; i++)
+    {
+        int aSunLeft = value;
+
+        int LargeSunValue = 50;
+        int SunValue = 25;
+        int SmallSunValue = 15;
+
+        if (aSunLeft == LargeSunValue || aSunLeft == SunValue || aSunLeft == SmallSunValue)
+        {
+            mBoard->AddCoin(mX, mY, aSunLeft == LargeSunValue ? COIN_LARGESUN : aSunLeft == SmallSunValue ? COIN_SMALLSUN : COIN_SUN, COIN_MOTION_FROM_PLANT);
+        }
+        else
+        {
+            while (aSunLeft >= SmallSunValue)
+            {
+                if (aSunLeft >= LargeSunValue)
+                {
+                    mBoard->AddCoin(mX, mY, COIN_LARGESUN, COIN_MOTION_FROM_PLANT);
+                    aSunLeft -= LargeSunValue;
+                }
+                else if (aSunLeft >= SunValue)
+                {
+                    mBoard->AddCoin(mX, mY, COIN_SUN, COIN_MOTION_FROM_PLANT);
+                    aSunLeft -= SunValue;
+                }
+                else if (aSunLeft >= SmallSunValue)
+                {
+                    mBoard->AddCoin(mX, mY, COIN_SMALLSUN, COIN_MOTION_FROM_PLANT);
+                    aSunLeft -= SmallSunValue;
+                }
+            }
         }
     }
 }

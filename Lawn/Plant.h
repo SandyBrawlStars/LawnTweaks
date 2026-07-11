@@ -3,6 +3,9 @@
 #include <string>
 #include "GameObject.h"
 
+#include "../DiscordRPC/rapidjson/document.h"
+#include "../DiscordRPC/rapidjson/filereadstream.h"
+
 #define MAX_MAGNET_ITEMS 5
 
 enum PlantSubClass
@@ -189,7 +192,28 @@ public:
     bool                    mSquished;                      
     bool                    mIsAsleep;                      
     bool                    mIsOnBoard;                     
-    bool                    mHighlighted;                   
+    bool                    mHighlighted;
+
+    int                     mActionRateRand;
+    int                     mSunAmount;
+    int                     mSunValue;
+    int                     mSunValueGrown;
+    int                     mPreAttackShots;
+    int                     mPreAttackPeriod;
+    int                     mHealPeriod;
+    int                     mPlantAge;
+    int                     mHealAmount;
+    int                     mOverhealAmount;
+    float                   mRangeMult;
+    float                   mPlantScale;
+
+    float                   mButterChance;
+    ProjectileType          mSecondaryType;
+    int                     mSecondaryDamage;
+
+    int                     mCrushedDamage;
+    int                     mExplodedDamage;
+    float                   mDamageReflectPercent;
 
 public:
     Plant();
@@ -294,6 +318,12 @@ public:
     void                    GoldMagnetFindTargets();
     bool                    IsAGoldMagnetAboutToSuck();
     bool                    DrawMagnetItemsOnTop();
+
+    void                    LoadJsonStats();
+    void                    LoadJsonStat(const char* name, rapidjson::Document& doc, int* var, float mult = 1.0f);
+    void                    LoadJsonStatProjectile(const char* name, rapidjson::Document& doc, ProjectileType* var);
+    void                    LoadJsonStatFloat(const char* name, rapidjson::Document& doc, float *var, float mult = 1.0f);
+    void                    CreateSun(int amount, int value);
 };
 
 float                       PlantDrawHeightOffset(Board* theBoard, Plant* thePlant, SeedType theSeedType, int theCol, int theRow);
@@ -321,7 +351,7 @@ class PlantProperty
 {
 public:
     SeedType                mSeedType;          // Identifier of the plant, ex: SEED_PEASHOOTER  
-    float                   mStartingRefresh;   // Starting refresh
+    int                     mStartingRefresh;   // Starting refresh
     int                     mToughness;         // Health of the plant
     int                     mDamage;            // Damage the plant deals
     int                     mStateCountdown;    // Countdown for plant states (chomper bites, sun shroom growth, etc)

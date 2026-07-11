@@ -6,6 +6,9 @@
 #include "../SexyAppFramework/Widget.h"
 #include "../SexyAppFramework/ButtonListener.h"
 
+#include "../DiscordRPC/rapidjson/document.h"
+#include "../DiscordRPC/rapidjson/filereadstream.h"
+
 #include "Plant.h"
 #include "Zombie.h"
 #include "Projectile.h"
@@ -402,7 +405,7 @@ public:
 	bool							IsValidCobCannonSpot(int theGridX, int theGridY);
 	bool							IsValidCobCannonSpotHelper(int theGridX, int theGridY);
 	void							MouseDownCobcannonFire(int x, int y, int theClickCount);
-	void							KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags);
+	void							KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags, int theDamage = 1800);
 	int								GetAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, int theDamageRangeFlags);
 	/*inline*/ int					GetSeedBankExtraWidth();
 	bool							IsFlagWave(int theWaveNumber);
@@ -477,7 +480,7 @@ public:
 	void							SetDaisyMode(bool theEnableDaisy);
 	void							SetSukhbirMode(bool theEnableSukhbir);
 	bool							MouseHitTestPlant(int x, int y, HitResult* theHitResult);
-	
+		
 	/*inline*/ Reanimation*			CreateRakeReanim(float theRakeX, float theRakeY, int theRenderOrder);
 	void							CompleteEndLevelSequenceForSaving();
 	void							RemoveZombiesForRepick();
@@ -493,7 +496,7 @@ public:
 	LoadBackgroundDebug - PickBackground but with a paramter instead of picking by itself
 	DrawHealthbarMini - new healthbar drawing function*/
 	void        LoadBackgroundDebug(BackgroundType theBackground);
-	void		DrawHealthbarMini(Graphics* g, Rect rect, Color maxColor, int maxNumber, Color baseColor, int baseNumber, int barWidth, int barHeight, int barOffsetX, int barOffsetY, Color textColor, Font* textFont, int textOffsetY, Color textOutlineColor, int textOutlineOffset, bool drawBarOutline);
+	void		DrawHealthbarMini(Graphics* g, Rect rect, Color maxColor, int maxNumber, Color baseColor, int baseNumber, int barWidth, int barHeight, int barOffsetX, int barOffsetY, Color textColor, Font* textFont, int textOffsetY, Color textOutlineColor, int textOutlineOffset, bool drawBarOutline, bool deletenum = false);
 };
 extern bool gShownMoreSunTutorial;
 
@@ -509,5 +512,7 @@ public:
 	const SexyChar* mBackgroundName; // background name
 };
 extern BackgroundDefinition gBackgroundDefs[NUM_ADVENTURE_BACKGROUNDS];
+
+void		JsonLoaderBoard();
 
 #endif // __BOARD_H__

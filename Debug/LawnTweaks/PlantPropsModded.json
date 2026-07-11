@@ -1,0 +1,117 @@
+{
+  "COMMENTS": {
+    "file name": "the property file should be called PlantProps.json to be usable, please change it!",
+    "actionraterand": "ActionRateRand is the range for a random reduction in the plants attack timer, 0.15 default",
+    "specialcountdown": "SpecialCountdown is the cooldown a instant plant has before activating",
+    "statecountdown": "StateCountdown is the cooldown a plant has before switching states:",
+    "list: ": "potato mine - time before arming, chomper - time before swallowing",
+    "cont: ": "sun shroom - time before growing, gravebuster - time before destroying grave",
+    "cont2: ": "lilypad/flowerpot - time while indestructible, squash, time before attacking",
+    "cont3: ": "tanglekelp - time before dragging zombie, spikeweed / spikerock: attack cooldown",
+    "cont4: ": "magnet shroom / gold magnet - cooldown between absorbing, imitater - time before transforming",
+    "cont5: ": "cob cannon - delay between loading ammo", 
+    "preattackshots and preattackperiod": "Repeater mechanic"
+  },
+  "KERNEL_PULT": {
+    "Toughness": 300,
+    "StartingRecharge": 0,
+    "Recharge": 7.5,
+    "Damage": 20,
+    "Projectile": "STAR",
+    "ButterChance": 0.45,
+    "SecondaryProjectile": "COBBIG",
+    "SecondaryDamage": 1800,
+    "SunCost": 350,
+    "ActionRate": 3,
+    "ActionRateRand": 0.25,
+    "PreAttackShots": 3,
+    "PreAttackPeriod": 0.35
+  },
+  "CACTUS": {
+    "Toughness": 300,
+    "StartingRecharge": 0,
+    "Recharge": 7.5,
+    "Damage": 80,
+    "Projectile": "WINTER_MELON",
+    "ButterChance": 0.1,
+    "SecondaryProjectile": "COBBIG",
+    "SecondaryDamage": 80,
+    "SunCost": 225,
+    "ActionRate": 0.5,
+    "ActionRateRand": 0.15
+  },
+  "SPLIT_PEA": {
+    "Toughness": 300,
+    "StartingRecharge": 0,
+    "Recharge": 7.5,
+    "Damage": 40,
+    "Projectile": "FIREBALL",
+    "SecondaryProjectile": "SNOW_PEA",
+    "SecondaryDamage": 20,
+    "SunCost": 225,
+    "ActionRate": 1.5,
+    "ActionRateRand": 0.15,
+    "PreAttackShots": 1,
+    "PreAttackPeriod": 0.25,
+    "OffsetX": -30,
+    "OffsetY": -20,
+    "Scale": 1.65
+  },
+  "TALL_NUT": {
+    "OffsetX": 15,
+    "OffsetY": 50,
+    "Scale": 0.25,
+    "Toughness": 50000,
+    "Recharge": 30,
+    "CrushedDamage": 25,
+    "ExplodedDamage": 100,
+    "OverhealAmount": 5000,
+    "HealAmount": 10,
+    "HealPeriod": 0.1,
+    "DamageReflectPercent": 500
+  },
+  "WALL_NUT": {
+    "SunCost": 500,
+    "Toughness": 30000,
+    "Recharge": 30,
+    "CrushedDamage": 0,
+    "ExplodedDamage": 0
+  },
+  "FUME_SHROOM": {
+
+  },
+  "SUNFLOWER": {
+    "HealAmount": -301,
+    "HealPeriod": 3,
+    "Toughness":  300,
+    "Recharge": 75,
+    "StartingRecharge": 0,
+    "SunValue": 25,
+    "SunAmount": 2,
+    "ActionRateRand": 0,
+    "SunCost": 0,
+    "ActionRate": 1
+  },
+  "CHERRY_BOMB": {
+    "SpecialCountdown": 0.1,
+    "Damage": 1800
+  },
+  "DOOM_SHROOM": {
+    "Damage": 1
+  },
+  "COB_CANNON": {
+    "Damage": 150
+  },
+  "POTATO_MINE": {
+    "StateCountdown": 0
+  },
+  "SPIKEROCK": {
+    "StateCountdown": 0.5,
+    "Damage": 10,
+    "RangeMult": -15
+  },
+  "CHOMPER": {
+    "StateCountdown": 0.1,
+    "RangeMult": 20
+  }
+}

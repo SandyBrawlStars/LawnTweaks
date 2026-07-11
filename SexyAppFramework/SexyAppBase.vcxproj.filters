@@ -1686,6 +1686,9 @@
       <Filter>Sexy\Graphics\Inc Routines</Filter>
     </None>
     <None Include="..\Cursor13.cur" />
+    <None Include="..\Debug\LawnTweaks\PlantProps.json">
+      <Filter>Lawn\Board\Board Source</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\ImageLib\jpeg2000\jas_cm.h">

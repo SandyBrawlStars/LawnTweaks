@@ -146,7 +146,8 @@ public:
         chunkHead_->next = 0;
     }
 
-    //! Destructor.
+    
+//! Destructor.
     /*! This deallocates all memory chunks, excluding the user-supplied buffer.
     */
     ~MemoryPoolAllocator() {
@@ -164,7 +165,6 @@ public:
         if (chunkHead_ && chunkHead_ == userBuffer_)
             chunkHead_->size = 0; // Clear user buffer
     }
-
     //! Computes the total capacity of allocated memory chunks.
     /*! \return total capacity in bytes.
     */

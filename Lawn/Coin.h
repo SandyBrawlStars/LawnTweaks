@@ -51,6 +51,7 @@ public:
     void                    Draw(Graphics* g);
     void                    Collect();
     /*inline*/ int          GetSunValue();
+    const static int        GetSunValueType(CoinType theCoinType);
     static /*inline*/ int   GetCoinValue(CoinType theCoinType);
     void                    UpdateFade();
     void                    UpdateFall();

@@ -644,13 +644,25 @@ void Projectile::UpdateLobMotion()
 			if (mBoard->mGargantuarsKilled >= 2 && !mApp->mPlayedQuickplay)
 				mApp->GetAchievement(ACHIEVEMENT_POPCORN_PARTY);
 		}
-		mBoard->KillAllZombiesInRadius(mRow, mPosX + 80, mPosY + 40, 115, 1, true, mDamageRangeFlags);
+		mBoard->KillAllZombiesInRadius(mRow, mPosX + 80, mPosY + 40, 115, 1, true, mDamageRangeFlags, mDamage);
 		DoImpact(nullptr);
 	}
 	else
 	{
 		DoImpact(aZombie);
 	}
+}
+
+int ProjectileFromName(const char* name)
+{
+	for (int i = 0; i < NUM_PROJECTILES; i++)
+	{
+		if (gProjectileDefinition[i].mProjectileName == StringToSexyString(name))
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
 void Projectile::UpdateNormalMotion()
