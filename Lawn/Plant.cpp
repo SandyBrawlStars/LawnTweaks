@@ -265,7 +265,7 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
         mExplosionXRadius = 60;
         break;
     case SEED_KERNELPULT:
-        mSecondaryType = PROJECTILE_KERNEL;
+        mSecondaryType = PROJECTILE_BUTTER;
         mSecondaryDamage = 40;
         break;
     case SEED_EXPLODE_O_NUT:
