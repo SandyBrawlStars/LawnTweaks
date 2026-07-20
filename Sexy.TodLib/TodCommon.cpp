@@ -144,6 +144,50 @@ TodWeightedArray* TodPickArrayItemFromWeightedArray(const TodWeightedArray* theA
 	return nullptr;
 }
 
+const TodProjectileWeightedArray* TodPickArrayItemFromWeightedArrayProjectile(const TodProjectileWeightedArray* theArray, int theCount)
+{
+	if (theCount <= 0)
+		return nullptr;
+
+	int aTotalWeight = 0;
+	for (int i = 0; i < theCount; i++)
+	{
+		aTotalWeight += theArray[i].mWeight;
+	}
+	if (!aTotalWeight) return theArray;
+
+	aTotalWeight = Sexy::Rand(aTotalWeight);
+
+	for (int i = 0; i < theCount; i++)
+	{
+		aTotalWeight -= theArray[i].mWeight;
+		if (aTotalWeight < 0)
+		{
+			return (TodProjectileWeightedArray*)&theArray[i];
+		}
+	}
+
+	TOD_ASSERT();
+	return nullptr;
+}
+
+int	TodArrayLength(const TodProjectileWeightedArray* theArray)
+{
+	int aVar = theArray[0].mWeight;
+	int i = 0;
+	while (aVar > 0)
+	{
+		i++;
+		aVar = theArray[i].mWeight;
+	}
+	return i;
+}
+
+int	TodPickFromWeightedArrayProjectile(const TodProjectileWeightedArray* theArray, int theCount)
+{
+	return TodPickArrayItemFromWeightedArrayProjectile(theArray, theCount)->mType;
+}
+
 TodWeightedGridArray* TodPickFromWeightedGridArray(const TodWeightedGridArray* theArray, int theCount)
 {
 	if (theCount <= 0)

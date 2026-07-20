@@ -12,12 +12,55 @@
     "cont5: ": "cob cannon - delay between loading ammo", 
     "preattackshots and preattackperiod": "Repeater mechanic"
   },
+  "THREEPEATER": {
+    "Toughness": 300,
+    "StartingRecharge": 0,
+    "Recharge": 7.5,
+    "Damage": 20,
+    "Projectile": "STAR",
+    "ProjectileWeightedArray": [
+      { "Type": "KERNEL", "Weight": 1, "Damage": 20 },
+      { "Type": "SNOW_PEA", "Weight": 1, "Damage": 20 },
+      { "Type": "MELON", "Weight": 1, "Damage": 80 },
+      { "Type": "WINTER_MELON", "Weight": 1, "Damage": 80 },
+      { "Type": "FIREBALL", "Weight": 1, "Damage": 40 },
+      { "Type": "CABBAGE", "Weight": 1, "Damage": 40 },
+      { "Type": "SPORE", "Weight": 1, "Damage": 20 },
+      { "Type": "SPIKE", "Weight": 1, "Damage": 20 },
+      { "Type": "BUTTER", "Weight": 1, "Damage": 40 },
+      { "Type": "KERNEL", "Weight": 1, "Damage": 40 }
+    ],
+    "SunCost": 350,
+    "ActionRate": 10,
+    "ActionRateRand": 0,
+    "PreAttackShots": 15,
+    "PreAttackPeriod": 0.35
+  },
   "KERNEL_PULT": {
     "Toughness": 300,
     "StartingRecharge": 0,
     "Recharge": 7.5,
     "Damage": 20,
     "Projectile": "STAR",
+    "ProjectileWeightedArray": [
+      { "Type": "KERNEL", "Weight": 2, "Damage": 20 },
+      { "Type": "SNOW_PEA", "Weight": 2, "Damage": 20 },
+      { "Type": "MELON", "Weight": 1, "Damage": 80 },
+      { "Type": "BUTTER", "Weight": 1, "Damage": 40 }
+    ],
+    "ProjectileSpreadArray": [
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 },
+      { "Type": "a", "Angle": {"Min": -40, "Max": 40}, "Speed": 3.33, "Damage": -1 }
+    ],
     "ButterChance": 0.45,
     "SecondaryProjectile": "COBBIG",
     "SecondaryDamage": 1800,
@@ -25,22 +68,24 @@
     "ActionRate": 3,
     "ActionRateRand": 0.25,
     "PreAttackShots": 3,
-    "PreAttackPeriod": 0.35
+    "PreAttackPeriod": 0.35,
+    "SpeedMult": 3
   },
   "CACTUS": {
     "Toughness": 300,
     "StartingRecharge": 0,
     "Recharge": 7.5,
-    "Damage": 80,
-    "Projectile": "WINTER_MELON",
+    "Damage": 1800,
+    "Projectile": "COBBIG",
     "ButterChance": 0.1,
-    "SecondaryProjectile": "COBBIG",
-    "SecondaryDamage": 80,
-    "SunCost": 225,
+    "SecondaryProjectile": "SPIKE",
+    "SecondaryDamage": 20,
+    "SunCost": 275,
     "ActionRate": 0.5,
-    "ActionRateRand": 0.15
+    "ActionRateRand": 0.05
   },
   "SPLIT_PEA": {
+    "SpeedMult": 3,
     "Toughness": 300,
     "StartingRecharge": 0,
     "Recharge": 7.5,
@@ -57,28 +102,58 @@
     "OffsetY": -20,
     "Scale": 1.65
   },
+  "PEASHOOTER": {
+    "Toughness": 300,
+    "StartingRecharge": 0,
+    "Recharge": 7.5,
+    "Damage": 20,
+    "Subclass": "Producer",
+    "Projectile": "STAR",
+    "SunCost": 225,
+    "ActionRate": 1.5,
+    "ActionRateRand": 0.15,
+    "PreAttackShots": 0,
+    "PreAttackPeriod": 0.25,
+    "ProjectileSpreadArray": [
+      { "Type": "a", "Angle": 90, "Speed": 3.33, "Damage": 20 },
+      { "Type": "a", "Angle": -90, "Speed": 3.33, "Damage": 20 },
+      { "Type": "a", "Angle": 30, "Speed": 3.33, "Damage": 20 },
+      { "Type": "a", "Angle": -30, "Speed": 3.33, "Damage": 20 },
+      { "Type": "a", "Angle": 180, "Speed": 3.33, "Damage": 20 }
+    ]
+  },
   "TALL_NUT": {
-    "OffsetX": 15,
-    "OffsetY": 50,
-    "Scale": 0.25,
-    "Toughness": 50000,
-    "Recharge": 30,
-    "CrushedDamage": 25,
-    "ExplodedDamage": 100,
-    "OverhealAmount": 5000,
-    "HealAmount": 10,
-    "HealPeriod": 0.1,
-    "DamageReflectPercent": 500
+    "ColorOverride": {
+      "r": 255,
+      "g": 64,
+      "b": 64,
+      "a": 255
+    },
+    "SunCost": 275,
+    "Toughness": 6000,
+    "Recharge": 60,
+    "CrushedDamage": 3000,
+    "ExplodedDamage": 1,
+    "DeathEffects": [
+      { "Type": "Explosion", "Value": 1800, "XRadius": 250, "RowRange": 2 }
+  ]
   },
   "WALL_NUT": {
-    "SunCost": 500,
-    "Toughness": 30000,
+    "SunCost": 75,
+    "Toughness": 4000,
+    "HealAmount": 100,
+    "HealPeriod": 5,
     "Recharge": 30,
-    "CrushedDamage": 0,
-    "ExplodedDamage": 0
+    "DeathEffects": [
+      { "Type": "Freeze",       "Value": 5, "XRadius": 116, "RowRange": 1 },
+      { "Type": "Chill",       "Value": 15, "XRadius": 116, "RowRange": 1 }
+  ]
   },
   "FUME_SHROOM": {
-
+    "DeathEffects": [
+      { "Type": "Hypnotise",       "Value": 0, "AffectEater": true }
+  ],
+  "RangeMult": -1
   },
   "SUNFLOWER": {
     "HealAmount": -301,
@@ -94,10 +169,17 @@
   },
   "CHERRY_BOMB": {
     "SpecialCountdown": 0.1,
+    
     "Damage": 1800
   },
   "DOOM_SHROOM": {
-    "Damage": 1
+    "Damage": 2700,
+    "ExplosionRowRange": 4,
+    "ExplosionXRadius": 450
+  },
+  "JALAPENO": {
+    "Damage": 300,
+    "ExplosionRowRange": 6
   },
   "COB_CANNON": {
     "Damage": 150
@@ -111,7 +193,8 @@
     "RangeMult": -15
   },
   "CHOMPER": {
-    "StateCountdown": 0.1,
+    "StateCountdown": 0.8,
+    "SpeedMult": 20,
     "RangeMult": 20
   }
 }

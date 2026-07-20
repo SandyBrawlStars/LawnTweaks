@@ -93,13 +93,13 @@ PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
     { SeedType::SEED_GRAVEBUSTER,       0,      300,    0,      400,   0,       PROJECTILE_PEA},
     { SeedType::SEED_HYPNOSHROOM,       2000,   300,    0,      0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_SCAREDYSHROOM,     0,      300,    20,     0,     0,       PROJECTILE_PUFF},
-    { SeedType::SEED_ICESHROOM,         3500,   300,    0,      0,     100,     PROJECTILE_PEA},
-    { SeedType::SEED_DOOMSHROOM,        3500,   300,    0,      1800,  100,     PROJECTILE_PEA},
+    { SeedType::SEED_ICESHROOM,         3500,   300,    20,     0,     100,     PROJECTILE_PEA},
+    { SeedType::SEED_DOOMSHROOM,        3500,   300,    1800,   0,     100,     PROJECTILE_PEA},
     { SeedType::SEED_LILYPAD,           0,      300,    0,      100,   0,       PROJECTILE_PEA},
     { SeedType::SEED_SQUASH,            2000,   300,    1800,   80,    0,       PROJECTILE_PEA},
     { SeedType::SEED_THREEPEATER,       0,      300,    20,     0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_TANGLEKELP,        2000,   300,    0,      100,   0,       PROJECTILE_PEA},
-    { SeedType::SEED_JALAPENO,          3500,   300,    0,      0,     100,     PROJECTILE_PEA},
+    { SeedType::SEED_JALAPENO,          3500,   300,    1800,   0,     100,     PROJECTILE_PEA},
     { SeedType::SEED_SPIKEWEED,         0,      300,    20,     100,   0,       PROJECTILE_PEA},
     { SeedType::SEED_TORCHWOOD,         0,      300,    0,      0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_TALLNUT,           2000,   8000,   0,      0,     0,       PROJECTILE_PEA},
@@ -128,7 +128,7 @@ PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
     { SeedType::SEED_SPIKEROCK,         3500,   450,    20,     100,   0,       PROJECTILE_PEA},
     { SeedType::SEED_COBCANNON,         3500,   300,    1800,   3000,  0,       PROJECTILE_COBBIG},
     { SeedType::SEED_IMITATER,          0,      300,    0,      200,   0,       PROJECTILE_PEA},
-    { SeedType::SEED_EXPLODE_O_NUT,     2000,   4000,   0,      1800,  0,       PROJECTILE_PEA},
+    { SeedType::SEED_EXPLODE_O_NUT,     2000,   4000,   1800,   0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_GIANT_WALLNUT,     2000,   4000,   0,      0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_SPROUT,            2000,   300,    0,      0,     0,       PROJECTILE_PEA},
     { SeedType::SEED_LEFTPEATER,        0,      300,    20,     0,     0,       PROJECTILE_PEA},
@@ -137,21 +137,20 @@ PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
 /*
 * Feature reminders
 * PlantProps:
-* - ProjectileWeightedList: {} using tod weighted array
-* ProjectileSpread: array of dicts, key is projectile, value is angle, projectile set to ANY is default plant projectile
-* - Explosives: RowRange and XRange
-* Subclass
+* 
 * UpgradeTo
-* - Chomper: IsBiting
-* For Shooters: IsHoming
-* - CrushedDamage
-* - ExplodedDamage
+* - For Shooters: ProjectileMotion
 * IsSleeping
-* - Color
+* IsAquatic
 * PlantOrder? 
 * Squash - Amount of jumps
+* CoffeeBean: WakesUp, StaysAlive, NeedsSleeping
+* -RequiresAwake for DeathEffect
+* SpreadIgnoresBaseAttack
+* - Last Stand Ban
 * 
 * ZombieProps:
+* 
 * Toughness
 * Armor Toughness
 * Armor
@@ -169,6 +168,7 @@ PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
 * ProjectileDamage
 * 
 * ProjectileProps:
+* 
 * TimeBeforeDelete
 * SpeedMult
 * FireIgnitedType
@@ -181,7 +181,6 @@ PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES] = {
 * SplashDamage
 * SplashRadius
 * Scale
-* 
 * Pierce
 * DamageType - Normal, Fire (disables chill), or Explosive (ash animation when zombie dies)
 * 
@@ -239,13 +238,39 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
     mSecondaryDamage = GetPlantProperty(mSeedType).mDamage;
     mSecondaryType = GetPlantProperty(mSeedType).mProjectileType;
 
+    mProjectileWeightedArray[0] = { 0, 0, 0 };
+    mProjectileArrayPick = nullptr;
+    mIsBiting = false;
+    mColorOverride = Color(255, 255, 255, 255);
+
+    mProjectileSpreadArray[0] = { true, 0, 0, 0, 0 , false, 0, 0};
+    mDeathEffect[0] = { DEATHEFFECT_NULL, 0, 0, 0, 0, false, true};
+
+    mExplosionRowRange = 1;
+    mExplosionXRadius = 115;
+
     switch (mSeedType)
     {
+    case SEED_JALAPENO:
+        mExplosionRowRange = 0;
     case SEED_TWINSUNFLOWER:
         mSunAmount = 2;
         break;
+    case SEED_DOOMSHROOM:
+        mExplosionRowRange = 3;
+        mExplosionXRadius = 250;
+        break;
+    case SEED_POTATOMINE:
+        mExplosionRowRange = 0;
+        mExplosionXRadius = 60;
+        break;
     case SEED_KERNELPULT:
         mSecondaryType = PROJECTILE_KERNEL;
+        mSecondaryDamage = 40;
+        break;
+    case SEED_EXPLODE_O_NUT:
+        mColorOverride = Color(255, 64, 64, 255);
+        mExplosionXRadius = 90;
         break;
     case SEED_REPEATER:
     case SEED_SPLITPEA:
@@ -310,6 +335,8 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
         aBodyReanim->mIsAttachment = true;
         mBodyReanimID = mApp->ReanimationGetID(aBodyReanim);
         mBlinkCountdown = 400 + Sexy::Rand(400);
+
+        aBodyReanim->mColorOverride = mColorOverride;
     }
 
     if (IsNocturnal(mSeedType) && mBoard && !mBoard->StageIsNight())
@@ -417,7 +444,6 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
         break;
     case SeedType::SEED_EXPLODE_O_NUT:
         mBlinkCountdown = 1000 + Sexy::Rand(1000);
-        aBodyReanim->mColorOverride = Color(255, 64, 64);
         break;
     case SeedType::SEED_GIANT_WALLNUT:
         mBlinkCountdown = 1000 + Sexy::Rand(1000);
@@ -604,6 +630,7 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
         mPlantHealth *= 2;
     }
     mPlantMaxHealth = mPlantHealth;
+
 
     if (mSeedType != SeedType::SEED_FLOWERPOT && IsOnBoard())
     {
@@ -1042,10 +1069,10 @@ void Plant::StarFruitFire()
     float aShootAngleY = sin(DEG_TO_RAD(30.0f)) * 3.33f;
     for (int i = 0; i < 5; i++)
     {
-        Projectile* aProjectile = mBoard->AddProjectile(mX + 25, mY + 25, mRenderOrder - 1, mRow, GetPlantProperty(mSeedType).mProjectileType);
+        Projectile* aProjectile = mBoard->AddProjectile(mX + 25, mY + 25, mRenderOrder - 1, mRow, GetProjectile());
         aProjectile->mDamageRangeFlags = GetDamageRangeFlags(PlantWeapon::WEAPON_PRIMARY);
         aProjectile->mMotionType = ProjectileMotion::MOTION_STAR;
-        aProjectile->mDamage = GetPlantProperty(mSeedType).mDamage;
+        aProjectile->mDamage = !mProjectileArrayPick ? GetPlantProperty(mSeedType).mDamage : mProjectileArrayPick->mDamage;
 
         switch (i)
         {
@@ -1174,17 +1201,13 @@ void Plant::UpdateProductionPlant()
                 CreateSun(mSunAmount, mSunValueGrown);
             }
         }
-        else if (mSeedType == SeedType::SEED_SUNFLOWER)
-        {
-            CreateSun(mSunAmount, mSunValue);
-        }
-        else if (mSeedType == SeedType::SEED_TWINSUNFLOWER)
-        {
-            CreateSun(mSunAmount, mSunValue);
-        }
         else if (mSeedType == SeedType::SEED_MARIGOLD)
         {
             mBoard->AddCoin(mX, mY, (Sexy::Rand(100) < 10) ? CoinType::COIN_GOLD : CoinType::COIN_SILVER, CoinMotion::COIN_MOTION_COIN);
+        }
+        else
+        {
+            CreateSun(mSunAmount, mSunValue);
         }
 
         if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BIG_TIME)
@@ -1919,6 +1942,8 @@ void Plant::UpdateChomper()
                 }
             }
 
+            if (mIsBiting && aZombie) doBite = true;
+
             if (doBite)
             {
                 mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
@@ -2542,7 +2567,7 @@ void Plant::UpdateBowling()
             mApp->PlaySample(SOUND_BOWLINGIMPACT2);
 
             int aDamageRangeFlags = GetDamageRangeFlags(PlantWeapon::WEAPON_PRIMARY) | 32U;
-            mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 90, 1, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
+            mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, mExplosionXRadius, mExplosionRowRange, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
             mApp->AddTodParticle(aPosX, aPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_POWIE);
             mBoard->ShakeBoard(3, -4);
 
@@ -2814,13 +2839,9 @@ void Plant::UpdateReanimColor()
     {
         aColorOverride = GetFlashingColor(mBoard->mMainCounter, 90);
     }
-    else if (mSeedType == SeedType::SEED_EXPLODE_O_NUT)
-    {
-        aColorOverride = Color(255, 64, 64);
-    }
     else
     {
-        aColorOverride = Color(255, 255, 255);
+        aColorOverride = mColorOverride;
     }
 
     aBodyReanim->mColorOverride = aColorOverride;
@@ -3012,6 +3033,13 @@ void Plant::Update()
     if (doUpdate)
     {
         mPlantAge++;
+        if (mSpeedMult < 1 && mSpeedMult > 0)
+        {
+            if (mPlantHealth < 0)
+                Die();
+            if (mPlantAge % (int)(1.0f / (1 - mSpeedMult)) == 0)
+                return;
+        }
         UpdateAbilities();
         Animate();
 
@@ -3019,6 +3047,15 @@ void Plant::Update()
             Die();
 
         UpdateReanim();
+        for (int i = 1; mSpeedMult > i; i++)
+        {
+            if (mSpeedMult - i > 0 && mPlantAge % ClampInt((int)(1.0f / (mSpeedMult - i)), 1, 1000) == 0)
+            {
+                UpdateAbilities();
+                Animate();
+                UpdateReanim();
+            }
+        }
     }
 }
 
@@ -4361,7 +4398,7 @@ void Plant::IceZombies()
     Zombie* aZombie = nullptr;
     while (mBoard->IterateZombies(aZombie))
     {
-        aZombie->HitIceTrap();
+        aZombie->HitIceTrap(GetPlantProperty(mSeedType).mDamage);
     }
 
     mBoard->mIceTrapCounter = 300;
@@ -4388,7 +4425,10 @@ void Plant::BurnRow(int theRow)
         if ((aZombie->mZombieType == ZombieType::ZOMBIE_BOSS || aZombie->mRow == theRow) && aZombie->EffectedByDamage(aDamageRangeFlags))
         {
             aZombie->RemoveColdEffects();
-            aZombie->ApplyBurn();
+            if (aZombie->mBodyHealth <= GetPlantProperty(mSeedType).mDamage)
+                aZombie->ApplyBurn();
+            else
+                aZombie->TakeDamage(GetPlantProperty(mSeedType).mDamage, 18U);
         }
     }
 
@@ -4465,7 +4505,7 @@ void Plant::DoSpecial()
         {
             mApp->GetAchievement(ACHIEVEMENT_EXPLODONATOR);
         }
-        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 115, 1, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
+        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, mExplosionXRadius, mExplosionRowRange, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
 
 
         mApp->AddTodParticle(aPosX, aPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_POWIE);
@@ -4478,7 +4518,7 @@ void Plant::DoSpecial()
     {
         mApp->PlaySample(SOUND_DOOMSHROOM);
 
-        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 250, 3, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
+        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, mExplosionXRadius, mExplosionRowRange, true, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
         KillAllPlantsNearDoom();
 
         mApp->AddTodParticle(aPosX, aPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_DOOM);
@@ -4496,8 +4536,25 @@ void Plant::DoSpecial()
         mBoard->DoFwoosh(mRow);
         mBoard->ShakeBoard(3, -4);
 
-        BurnRow(mRow);
         mBoard->mIceTimer[mRow] = 20;
+        BurnRow(mRow);
+        for (int i = 1; mExplosionRowRange >= i; i++)
+        {
+            int rowAbove = mRow - i;
+            int rowBelow = mRow + i;
+            if (rowAbove >= 0)
+            {
+                BurnRow(rowAbove);
+                mBoard->DoFwoosh(rowAbove);
+                mBoard->mIceTimer[rowAbove] = 20;
+            }
+            if (rowBelow < MAX_GRID_SIZE_Y)
+            {
+                BurnRow(rowBelow);
+                mBoard->DoFwoosh(rowBelow);
+                mBoard->mIceTimer[rowBelow] = 20;
+            }
+        }
 
         Die();
         break;
@@ -4529,7 +4586,7 @@ void Plant::DoSpecial()
         aPosY = mY + mHeight / 2;
 
         mApp->PlaySample(SOUND_POTATO_MINE);
-        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 60, 0, false, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
+        mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, mExplosionXRadius, mExplosionRowRange, false, aDamageRangeFlags, GetPlantProperty(mSeedType).mDamage);
         if(!mApp->IsIZombieLevel() && !mApp->mPlayedQuickplay)
             mApp->GetAchievement(AchievementType::ACHIEVEMENT_SPUDOW);
 
@@ -4646,11 +4703,7 @@ void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon
         return;
     }
 
-    ProjectileType aProjectileType = GetPlantProperty(mSeedType).mProjectileType;
-    if (thePlantWeapon == PlantWeapon::WEAPON_SECONDARY)
-    {
-        aProjectileType = mSecondaryType;
-    }
+    ProjectileType aProjectileType = GetProjectile(thePlantWeapon);
 
     mApp->PlayFoley(FoleyType::FOLEY_THROW);
     if (aProjectileType == PROJECTILE_SNOWPEA || aProjectileType == PROJECTILE_WINTERMELON)
@@ -4796,9 +4849,83 @@ void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon
         aProjectile->ConvertToFireball(mPlantCol);
     }
     if (!(thePlantWeapon == PlantWeapon::WEAPON_SECONDARY))
-        aProjectile->mDamage = GetPlantProperty(mSeedType).mDamage;
+        aProjectile->mDamage = !mProjectileArrayPick ? GetPlantProperty(mSeedType).mDamage : mProjectileArrayPick->mDamage;
     else
         aProjectile->mDamage = mSecondaryDamage;
+
+    for (int i = 0; i < 50 && i < SpreadArrayLen(mProjectileSpreadArray); i++)
+    {
+        ProjectileSpreadArray object = mProjectileSpreadArray[i];
+        ProjectileType aSpreadProjectileType = object.mProjectileType < 0 ? static_cast<ProjectileType>(GetProjectile(thePlantWeapon)) : static_cast<ProjectileType>(object.mProjectileType);
+
+        float aAngle = object.mAngle;
+        if (object.mRandomizeAngle)
+        {
+            aAngle = RandRangeFloat(object.mMinAngle, object.mMaxAngle);
+        }
+
+        float aSpeedX = object.mSpeed * cos(DEG_TO_RAD(aAngle));
+        float aSpeedY = object.mSpeed * -sin(DEG_TO_RAD(aAngle));
+
+        Projectile* aSpreadProjectile = mBoard->AddProjectile(aOriginX, aOriginY, mRenderOrder - 1, theRow, aSpreadProjectileType);
+        aSpreadProjectile->mMotionType = MOTION_STAR;
+           
+        aSpreadProjectile->mDamageRangeFlags = GetDamageRangeFlags(thePlantWeapon);
+        if (aSpreadProjectile->mProjectileType == PROJECTILE_FIREBALL)
+        {
+            aSpreadProjectile->ConvertToFireball(mPlantCol);
+        }
+        if (object.mDamage != -1)
+            aSpreadProjectile->mDamage = object.mDamage;
+        else
+        {
+            aSpreadProjectile->mDamage = !mProjectileArrayPick ? GetPlantProperty(mSeedType).mDamage : mProjectileArrayPick->mDamage;
+        }
+        aSpreadProjectile->mVelX = aSpeedX;
+        aSpreadProjectile->mVelY = aSpeedY;
+
+        if (mSeedType == SeedType::SEED_CABBAGEPULT || mSeedType == SeedType::SEED_KERNELPULT ||
+            mSeedType == SeedType::SEED_MELONPULT || mSeedType == SeedType::SEED_WINTERMELON)
+        {
+            aSpreadProjectile->mMotionType = MOTION_LOBBED;
+            float aRangeX, aRangeY;
+            if (theTargetZombie)
+            {
+                Rect aZombieRect = theTargetZombie->GetZombieRect();
+                aRangeX = theTargetZombie->ZombieTargetLeadX(50.0f) - aOriginX - 30.0f;
+                aRangeY = aZombieRect.mY - aOriginY;
+
+                if (theTargetZombie->mZombiePhase == ZombiePhase::PHASE_DOLPHIN_RIDING)
+                {
+                    aRangeX -= 60.0f;
+                }
+                if (theTargetZombie->mZombieType == ZombieType::ZOMBIE_POGO && theTargetZombie->mHasObject)
+                {
+                    aRangeX -= 60.0f;
+                }
+                if (theTargetZombie->mZombiePhase == ZombiePhase::PHASE_SNORKEL_WALKING_IN_POOL)
+                {
+                    aRangeX -= 40.0f;
+                }
+                if (theTargetZombie->mZombieType == ZombieType::ZOMBIE_BOSS)
+                {
+                    aRangeY = mBoard->GridToPixelY(8, mRow) - aOriginY;
+                }
+            }
+            else
+            {
+                aRangeX = 700.0f - aOriginX;
+                aRangeY = 0.0f;
+            }
+            if (aRangeX < 40.0f)
+            {
+                aRangeX = 40.0f;
+            }
+            aSpreadProjectile->mVelX = (aRangeX / 120.0f) * ClampFloat(aSpeedX, 0, 1);
+            aSpreadProjectile->mVelZ = aRangeY / 120.0f - 7.0f;
+            aSpreadProjectile->mAccZ = 0.115f;
+        }
+    }
 
     if (mSeedType == SeedType::SEED_CABBAGEPULT || mSeedType == SeedType::SEED_KERNELPULT ||
         mSeedType == SeedType::SEED_MELONPULT || mSeedType == SeedType::SEED_WINTERMELON)
@@ -5052,6 +5179,83 @@ int Plant::DistanceToClosestZombie()
 
 void Plant::Die()
 {
+    for (int i = 0; i < 50 && mDeathEffect[i].mType != DEATHEFFECT_NULL; i++)
+    {
+        DeathEffect aCur = mDeathEffect[i];
+        int aPosX = mX + mWidth / 2;
+        int aPosY = mY + mHeight / 2;
+        if (aCur.mType == DEATHEFFECT_EXPLOSION)
+        {
+            mApp->AddTodParticle(aPosX, aPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_POWIE);
+            mApp->PlayFoley(FoleyType::FOLEY_CHERRYBOMB);
+        }
+        if (aCur.mType == DEATHEFFECT_FREEZE && aCur.mXRadius > 115)
+        {
+            mApp->AddTodParticle(aPosX, aPosY, (int)RenderLayer::RENDER_LAYER_TOP, ParticleEffect::PARTICLE_ICE_TRAP);
+        }
+        if (aCur.mType == DEATHEFFECT_CREATESUN)
+        {
+            CreateSun(aCur.mAmount, aCur.mValue);
+            continue;
+        }
+        Zombie* aZombie = nullptr;
+        unsigned int aDamageRangeFlags = 0;
+        if (aCur.mType == DEATHEFFECT_EXPLOSION) {
+            SetBit(aDamageRangeFlags, DamageRangeFlags::DAMAGES_GROUND, true); 
+            SetBit(aDamageRangeFlags, DamageRangeFlags::DAMAGES_FLYING, true);
+            SetBit(aDamageRangeFlags, DamageRangeFlags::DAMAGES_SUBMERGED, true);
+            SetBit(aDamageRangeFlags, DamageRangeFlags::DAMAGES_UNDERGROUND, true);
+        }
+        if (aCur.mType == DEATHEFFECT_DAMAGE) {
+            SetBit(aDamageRangeFlags, DamageRangeFlags::DAMAGES_GROUND, true);
+        }
+            
+        while (mBoard->IterateZombies(aZombie))
+        {
+            Rect aZombieRect = aZombie->GetZombieRect();
+            int aRowDist = aZombie->mRow - mRow;
+            if (aZombie->mZombieType == ZombieType::ZOMBIE_BOSS)
+            {
+                aRowDist = 0;
+            }
+
+            if (aRowDist <= aCur.mRowRange && aRowDist >= -aCur.mRowRange && GetCircleRectOverlap(aPosX, aPosY, aCur.mXRadius, aZombieRect))
+            {
+                if (aCur.mType == DEATHEFFECT_EXPLOSION || aCur.mType == DEATHEFFECT_DAMAGE) {
+                    if (aZombie->EffectedByDamage(aDamageRangeFlags))
+                    {
+                        if (aCur.mBurn && aZombie->mBodyHealth < aCur.mValue && aCur.mType == DEATHEFFECT_EXPLOSION)
+                        {
+                            aZombie->ApplyBurn();
+                        }
+                        else
+                        {
+                            aZombie->TakeDamage(aCur.mValue, aCur.mType == DEATHEFFECT_EXPLOSION ? 18U : 0U);
+                        }
+                    }
+                }
+                else if (aCur.mType == DEATHEFFECT_HYPNOTISE)
+                {
+                    aZombie->TakeDamage(aCur.mValue, 0U);
+                    aZombie->Hypnotise();
+                }
+                else if (aCur.mType == DEATHEFFECT_FREEZE)
+                {
+                    aZombie->ApplyFreezeValue(aCur.mValue * 100);
+                }
+                else if (aCur.mType == DEATHEFFECT_CHILL)
+                {
+                    aZombie->ApplyChillValue(aCur.mValue * 100);
+                }
+                else if (aCur.mType == DEATHEFFECT_FREEZE)
+                {
+                    aZombie->ApplyFreezeValue(aCur.mValue * 100);
+                }
+            }
+        }
+    }
+
+
     if (IsOnBoard() && mSeedType == SeedType::SEED_TANGLEKELP)
     {
         Zombie* aZombie = mBoard->ZombieTryToGet(mTargetZombieID);
@@ -5305,7 +5509,12 @@ Rect Plant::GetPlantAttackRect(PlantWeapon thePlantWeapon)
     default:                            aRect = Rect(mX + 60,       mY,             BOARD_WIDTH,        mHeight);               break;
     }
 
-    aRect.mWidth *= mRangeMult;
+    if (mRangeMult > 0)
+        aRect.mWidth *= mRangeMult;
+    else {
+        aRect.mWidth *= abs(mRangeMult);
+        aRect.mX -= aRect.mWidth;
+    }
     return aRect;
 }
 
@@ -5395,6 +5604,7 @@ void Plant::LoadJsonStats()
 
         LoadJsonStat("CrushedDamage", doc, &mCrushedDamage);
         LoadJsonStat("ExplodedDamage", doc, &mExplodedDamage);
+        LoadJsonStat("ExplosionRowRange", doc, &mExplosionRowRange);
         
         // Float
         float aOffsetX = 0.0f, aOffsetY = 0.0f;
@@ -5403,14 +5613,185 @@ void Plant::LoadJsonStats()
         LoadJsonStatFloat("Scale", doc, &mPlantScale);
         LoadJsonStatFloat("DamageReflectPercent", doc, &mDamageReflectPercent);
         LoadJsonStatFloat("ButterChance", doc, &mButterChance, 10.0f);
+        LoadJsonStatFloat("SpeedMult", doc, &mSpeedMult);
+        LoadJsonStatFloat("ExplosionXRadius", doc, &mExplosionXRadius);
 
         LoadJsonStatFloat("OffsetX", doc, &aOffsetX);
         LoadJsonStatFloat("OffsetY", doc, &aOffsetY);
         mX += aOffsetX, mY += aOffsetY;
 
+        // Bool
+        LoadJsonStatBool("IsBiting", doc, &mIsBiting);
+
         // Strings
         LoadJsonStatProjectile("Projectile", doc, &gPlantProps[mSeedType].mProjectileType);
         LoadJsonStatProjectile("SecondaryProjectile", doc, &mSecondaryType);
+
+        if (doc[gPlantDefs[mSeedType].mPlantName].HasMember("Subclass") && doc[gPlantDefs[mSeedType].mPlantName]["Subclass"].IsString())
+        {
+            const char *str = doc[gPlantDefs[mSeedType].mPlantName]["Subclass"].GetString();
+            if (StringToSexyString(str) == _S("Shooter"))
+            {
+                gPlantDefs[mSeedType].mSubClass = SUBCLASS_SHOOTER;
+            }
+            else if (StringToSexyString(str) == _S("Producer"))
+            {
+                gPlantDefs[mSeedType].mSubClass = SUBCLASS_SUNPRODUCER;
+            }
+            else if(StringToSexyString(str) == _S("Normal"))
+            {
+                gPlantDefs[mSeedType].mSubClass = SUBCLASS_NORMAL;
+            }
+        }
+
+        // Arrays
+        if (doc[gPlantDefs[mSeedType].mPlantName].HasMember("ProjectileWeightedArray") && doc[gPlantDefs[mSeedType].mPlantName]["ProjectileWeightedArray"].IsArray())
+        {
+            const rapidjson::Value & aWeightedArray = doc[gPlantDefs[mSeedType].mPlantName]["ProjectileWeightedArray"];
+            for (int i = 0; i < aWeightedArray.Size() && i < 50; i++)
+            {
+                TodProjectileWeightedArray result = {PROJECTILE_PEA, 1, 20};
+
+                if (aWeightedArray[i].IsObject())
+                {
+                    if (aWeightedArray[i].HasMember("Type") && aWeightedArray[i]["Type"].IsString())
+                    {
+                        int aProj = ProjectileFromName(aWeightedArray[i]["Type"].GetString());
+                        if (aProj != -1)
+                            result.mType = aProj;
+                        else
+                            result.mType = -1;
+                    }
+                    if (aWeightedArray[i].HasMember("Damage") && aWeightedArray[i]["Damage"].IsInt())
+                    {
+                        result.mDamage = aWeightedArray[i]["Damage"].GetInt();
+                    }
+                    if (aWeightedArray[i].HasMember("Weight") && aWeightedArray[i]["Weight"].IsInt())
+                    {
+                        result.mWeight = aWeightedArray[i]["Weight"].GetInt();
+                    }
+                }
+
+                mProjectileWeightedArray[i] = result;
+            }
+        }
+
+        if (doc[gPlantDefs[mSeedType].mPlantName].HasMember("ProjectileSpreadArray") && doc[gPlantDefs[mSeedType].mPlantName]["ProjectileSpreadArray"].IsArray())
+        {
+            const rapidjson::Value& aSpreadArray = doc[gPlantDefs[mSeedType].mPlantName]["ProjectileSpreadArray"];
+            for (int i = 0; i < aSpreadArray.Size() && i < 50; i++)
+            {
+                ProjectileSpreadArray result = { false, -1, 20, 0, 3.33f };
+
+                if (aSpreadArray[i].IsObject())
+                {
+                    if (aSpreadArray[i].HasMember("Type") && aSpreadArray[i]["Type"].IsString())
+                    {
+                        result.mProjectileType = ProjectileFromName(aSpreadArray[i]["Type"].GetString());
+                    }
+                    if (aSpreadArray[i].HasMember("Damage") && aSpreadArray[i]["Damage"].IsInt())
+                    {
+                        result.mDamage = aSpreadArray[i]["Damage"].GetInt();
+                    }
+
+                    if (aSpreadArray[i].HasMember("Angle"))
+                    {
+                        if (aSpreadArray[i]["Angle"].IsInt())
+                            result.mAngle = aSpreadArray[i]["Angle"].GetInt();
+                        else if (aSpreadArray[i]["Angle"].IsFloat())
+                            result.mAngle = aSpreadArray[i]["Angle"].GetFloat();
+                        else if (aSpreadArray[i]["Angle"].IsObject()) {
+                            if (aSpreadArray[i]["Angle"].HasMember("Min"))
+                            {
+                                if (aSpreadArray[i]["Angle"]["Min"].IsInt())
+                                    result.mMinAngle = aSpreadArray[i]["Angle"]["Min"].GetInt();
+                                else if (aSpreadArray[i]["Angle"]["Min"].IsFloat())
+                                    result.mMinAngle = aSpreadArray[i]["Angle"]["Min"].GetFloat();
+                                result.mRandomizeAngle = true;
+                            }
+                            if (aSpreadArray[i]["Angle"].HasMember("Max"))
+                            {
+                                if (aSpreadArray[i]["Angle"]["Max"].IsInt())
+                                    result.mMaxAngle = aSpreadArray[i]["Angle"]["Max"].GetInt();
+                                else if (aSpreadArray[i]["Angle"]["Max"].IsFloat())
+                                    result.mMaxAngle = aSpreadArray[i]["Angle"]["Max"].GetFloat();
+                                result.mRandomizeAngle = true;
+                            }
+                        }
+                    }
+                    if (aSpreadArray[i].HasMember("Speed"))
+                    {
+                        if (aSpreadArray[i]["Speed"].IsInt())
+                            result.mSpeed = aSpreadArray[i]["Speed"].GetInt();
+                        else if (aSpreadArray[i]["Speed"].IsFloat())
+                            result.mSpeed = aSpreadArray[i]["Speed"].GetFloat();
+                    }
+                }
+
+                mProjectileSpreadArray[i] = result;
+            }
+        }
+
+        if (doc[gPlantDefs[mSeedType].mPlantName].HasMember("DeathEffects") && doc[gPlantDefs[mSeedType].mPlantName]["DeathEffects"].IsArray())
+        {
+            const rapidjson::Value& aDeathEffectArray = doc[gPlantDefs[mSeedType].mPlantName]["DeathEffects"];
+            for (int i = 0; i < aDeathEffectArray.Size() && i < 50; i++)
+            {
+                DeathEffect result = { DEATHEFFECT_NULL, 0, 0, 0, 0, false, true };
+                const rapidjson::Value& aCur = aDeathEffectArray[i];
+
+                if (aCur.IsObject())
+                {
+                    if (aCur.HasMember("Type") && aCur["Type"].IsString())
+                    {
+                        if (aCur["Type"] == "Explosion")
+                            result.mType = DEATHEFFECT_EXPLOSION;
+                        else if (aCur["Type"] == "Hypnotise")
+                            result.mType = DEATHEFFECT_HYPNOTISE;
+                        else if (aCur["Type"] == "Damage")
+                            result.mType = DEATHEFFECT_DAMAGE;
+                        else if (aCur["Type"] == "Chill")
+                            result.mType = DEATHEFFECT_CHILL;
+                        else if (aCur["Type"] == "Freeze")
+                            result.mType = DEATHEFFECT_FREEZE;
+                        else if (aCur["Type"] == "CreateSun")
+                            result.mType = DEATHEFFECT_CREATESUN;
+                    }
+                    if (aCur.HasMember("Value"))
+                    {
+                        if (aCur["Value"].IsInt()) result.mValue = aCur["Value"].GetInt();
+                        else if (aCur["Value"].IsFloat()) result.mValue = aCur["Value"].GetFloat();
+                    }
+                    if (aCur.HasMember("XRadius"))
+                    {
+                        if (aCur["XRadius"].IsInt()) result.mXRadius = aCur["XRadius"].GetInt();
+                        else if (aCur["XRadius"].IsFloat()) result.mXRadius = aCur["XRadius"].GetFloat();
+                    }
+                    if (aCur.HasMember("Amount") && aCur["Amount"].IsInt()) result.mAmount = aCur["Amount"].GetInt();
+                    if (aCur.HasMember("RowRange") && aCur["RowRange"].IsInt()) result.mRowRange = aCur["RowRange"].GetInt();
+                    if (aCur.HasMember("AffectEater") && aCur["AffectEater"].IsBool()) result.mAffectEater = aCur["AffectEater"].GetBool();
+                    if (aCur.HasMember("Burn") && aCur["Burn"].IsBool()) result.mBurn = aCur["Burn"].GetBool();
+                }
+
+                mDeathEffect[i] = result;
+            }
+        }
+
+        // Objects
+        if (doc[gPlantDefs[mSeedType].mPlantName].HasMember("ColorOverride") && doc[gPlantDefs[mSeedType].mPlantName]["ColorOverride"].IsObject())
+        {
+            const rapidjson::Value& aColor = doc[gPlantDefs[mSeedType].mPlantName]["ColorOverride"];
+            Color aColorOverride = Color(255, 255, 255, 255);
+            if (aColor.HasMember("r") && aColor["r"].IsInt())
+                aColorOverride.mRed = aColor["r"].GetInt();
+            if (aColor.HasMember("g") && aColor["g"].IsInt())
+                aColorOverride.mGreen = aColor["g"].GetInt();
+            if (aColor.HasMember("b") && aColor["b"].IsInt())
+                aColorOverride.mBlue = aColor["b"].GetInt();
+            if (aColor.HasMember("a") && aColor["a"].IsInt())
+                aColorOverride.mAlpha = aColor["a"].GetInt();
+            mColorOverride = aColorOverride;
+        }
     }
 }
 
@@ -5450,6 +5831,15 @@ void Plant::LoadJsonStatFloat(const char* name, rapidjson::Document& doc, float*
     }
 }
 
+
+void Plant::LoadJsonStatBool(const char* name, rapidjson::Document& doc, bool* var)
+{
+    if (doc[gPlantDefs[mSeedType].mPlantName].HasMember(name) && doc[gPlantDefs[mSeedType].mPlantName][name].IsBool())
+    {
+        *var = doc[gPlantDefs[mSeedType].mPlantName][name].GetBool();
+    }
+}
+
 void Plant::CreateSun(int amount, int value)
 {
     for (int i = 0; i < amount; i++)
@@ -5486,4 +5876,32 @@ void Plant::CreateSun(int amount, int value)
             }
         }
     }
+}
+
+ProjectileType Plant::GetProjectile(PlantWeapon thePlantWeapon)
+{
+    if (TodArrayLength(mProjectileWeightedArray) == 0)
+    {
+        return thePlantWeapon == WEAPON_SECONDARY ? mSecondaryType : GetPlantProperty(mSeedType).mProjectileType;
+    }
+    else
+    {
+        mProjectileArrayPick = (TodProjectileWeightedArray*)TodPickArrayItemFromWeightedArrayProjectile(mProjectileWeightedArray, TodArrayLength(mProjectileWeightedArray));
+        if (mProjectileArrayPick && mProjectileArrayPick->mType != -1)
+            return  thePlantWeapon == WEAPON_SECONDARY ? mSecondaryType : static_cast<ProjectileType>(mProjectileArrayPick->mType);
+        else
+            return PROJECTILE_PEA;
+    }
+}
+
+int SpreadArrayLen(const ProjectileSpreadArray* theArray)
+{
+    int aVar = theArray[0].mNULL;
+    int i = 0;
+    while (!aVar)
+    {
+        i++;
+        aVar = theArray[i].mNULL;
+    }
+    return i;
 }

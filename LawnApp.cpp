@@ -493,6 +493,13 @@ bool LawnApp::TryLoadGame()
 		{
 			mFirstTimeGameSelector = false;
 			DoContinueDialog();
+
+			Plant* aPlant = nullptr;
+			while (mBoard->IteratePlants(aPlant))
+			{
+				aPlant->LoadJsonStats();
+			}
+
 			return true;
 		}
 		KillBoard();

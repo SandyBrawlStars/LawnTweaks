@@ -321,8 +321,7 @@ unsigned int SeedChooserScreen::SeedNotRecommendedToPick(SeedType theSeedType)
 
 bool SeedChooserScreen::SeedNotAllowedToPick(SeedType theSeedType)
 {
-	return mApp->mGameMode == GAMEMODE_CHALLENGE_LAST_STAND && (theSeedType == SEED_SUNFLOWER || theSeedType == SEED_SUNSHROOM ||
-		theSeedType == SEED_TWINSUNFLOWER || theSeedType == SEED_SEASHROOM || theSeedType == SEED_PUFFSHROOM);
+	return mApp->mGameMode == GAMEMODE_CHALLENGE_LAST_STAND && (gPlantDefs[theSeedType].mSubClass == SUBCLASS_SUNPRODUCER || theSeedType == SEED_SEASHROOM || theSeedType == SEED_PUFFSHROOM);
 }
 
 bool SeedChooserScreen::SeedNotAllowedDuringTrial(SeedType theSeedType)

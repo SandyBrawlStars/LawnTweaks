@@ -46,7 +46,7 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	mPosX = theX;
 	mPosY = theY;
 	mPosZ = 0.0f;
-	mVelX = 0.0f;
+	mVelX = 3.33f;
 	mVelY = 0.0f;
 	mVelZ = 0.0f;
 	mAccZ = 0.0f;
@@ -274,7 +274,7 @@ void Projectile::CheckForCollision()
 		return;
 	}
 
-	if (mProjectileType == ProjectileType::PROJECTILE_STAR && (mPosY > 600.0f || mPosY < 0.0f))
+	if ((mMotionType == MOTION_STRAIGHT || mMotionType == MOTION_STAR) && (mPosY > 600.0f || mPosY < 0.0f))
 	{
 		Die();
 		return;
@@ -429,7 +429,7 @@ unsigned int Projectile::GetDamageFlags(Zombie* theZombie)
 	{
 		SetBit(aDamageFlags, (int)DamageFlags::DAMAGE_BYPASSES_SHIELD, true);
 	}
-	else if (mMotionType == ProjectileMotion::MOTION_STAR && mVelX < 0.0f)
+	else if ((mMotionType == ProjectileMotion::MOTION_STAR || mMotionType == ProjectileMotion::MOTION_STRAIGHT) && mVelX < 0.0f)
 	{
 		SetBit(aDamageFlags, (int)DamageFlags::DAMAGE_BYPASSES_SHIELD, true);
 	}
@@ -543,6 +543,11 @@ void Projectile::UpdateLobMotion()
 	}
 	mPosX += mVelX;
 	mPosY += mVelY;
+	mShadowY += mVelY;
+	if (mVelY != 0.0f)
+	{
+		mRow = mBoard->PixelToGridYKeepOnBoard(mPosX, mPosY + mPosZ);
+	}
 	mPosZ += mVelZ;
 
 	bool isRising = mVelZ < 0.0f;
@@ -669,7 +674,12 @@ void Projectile::UpdateNormalMotion()
 {
 	if (mMotionType == ProjectileMotion::MOTION_BACKWARDS)
 	{
-		mPosX -= 3.33f;
+		mPosX -= mVelX;
+		mPosY += mVelY;
+		if (mVelY != 0.0f)
+		{
+			mRow = mBoard->PixelToGridYKeepOnBoard(mPosX, mPosY);
+		}
 	}
 	else if (mMotionType == ProjectileMotion::MOTION_HOMING)
 	{
@@ -713,7 +723,12 @@ void Projectile::UpdateNormalMotion()
 		{
 			mPosY -= 0.5f;
 		}
-		mPosX += 3.33f;
+		mPosX += mVelX;
+		mPosY += mVelY;
+		if (mVelY != 0.0f)
+		{
+			mRow = mBoard->PixelToGridYKeepOnBoard(mPosX, mPosY);
+		}
 	}
 	else if (mMotionType == ProjectileMotion::MOTION_FLOAT_OVER)
 	{
@@ -732,18 +747,24 @@ void Projectile::UpdateNormalMotion()
 		{
 			mPosY -= 0.5f;
 		}
-		mPosX -= 3.33f;
+		mPosX -= mVelX;
+		mPosY += mVelY;
 	}
 	else if (mMotionType == ProjectileMotion::MOTION_THREEPEATER)
 	{
-		mPosX += 3.33f;
+		mPosX += mVelX;
 		mPosY += mVelY;
 		mVelY *= 0.97f;
 		mShadowY += mVelY;
 	}
 	else
 	{
-		mPosX += 3.33f;
+		mPosX += mVelX;
+		mPosY += mVelY;
+		if (mVelY != 0.0f)
+		{
+			mRow = mBoard->PixelToGridYKeepOnBoard(mPosX, mPosY);
+		}
 	}
 
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HIGH_GRAVITY)
@@ -798,6 +819,7 @@ void Projectile::UpdateMotion()
 		mPosZ -= aSlopeHeightChange;
 	}
 	mShadowY += aSlopeHeightChange;
+
 	mX = (int)mPosX;
 	mY = (int)(mPosY + mPosZ);
 }

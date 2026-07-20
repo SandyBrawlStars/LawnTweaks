@@ -184,6 +184,8 @@ public:
     /*inline*/ void                 SetRow(int theRow);
     float                           GetPosYBasedOnRow(int theRow);
     void                            ApplyChill(bool theIsIceTrap);
+    void                            ApplyChillValue(int value);
+    void                            ApplyFreezeValue(int value);
     void                            UpdateZombieBungee();
     void                            BungeeLanding();
     bool                            EffectedByDamage(unsigned int theDamageRangeFlags);
@@ -238,7 +240,7 @@ public:
     void                            BungeeLiftTarget();
     void                            UpdateYuckyFace();
     void                            DrawIceTrap(Graphics* g, const ZombieDrawPosition& theDrawPos, bool theFront);
-    void                            HitIceTrap();
+    void                            HitIceTrap(int theDamage = 20);
     int                             GetHelmDamageIndex();
     int                             GetShieldDamageIndex();
     void                            DrawReanim(Graphics* g, const ZombieDrawPosition& theDrawPos, int theBaseRenderGroup);
@@ -352,6 +354,7 @@ public:
     void                            ShowYuckyFace(bool theShow);
     void                            AnimateChewSound();
     void                            AnimateChewEffect();
+    void                            Hypnotise();
     void                            UpdateActions();
     void                            CheckForBoardEdge();
     void                            UpdateYeti();

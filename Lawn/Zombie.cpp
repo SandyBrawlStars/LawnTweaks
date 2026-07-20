@@ -4630,21 +4630,8 @@ void Zombie::AnimateChewSound()
     {
         if (aPlant->mSeedType == SeedType::SEED_HYPNOSHROOM && !aPlant->mIsAsleep)
         {
-            mApp->PlayFoley(FoleyType::FOLEY_FLOOP);
             aPlant->Die();
-
-            StartMindControlled();
-            mApp->AddTodParticle(mPosX + 60.0f, mPosY + 40.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_MIND_CONTROL);
-            TrySpawnLevelAward();
-
-            mVelX = 0.17f;
-            mAnimTicksPerFrame = 18;
-            UpdateAnimSpeed();
-
-            if (mZombieType == ZombieType::ZOMBIE_DANCER && !mApp->mPlayedQuickplay)
-            {
-                mApp->GetAchievement(AchievementType::ACHIEVEMENT_DISCO_IS_UNDEAD);
-            }
+            Hypnotise();
         }
         else if (aPlant->mSeedType == SeedType::SEED_GARLIC)
         {
@@ -4678,6 +4665,24 @@ void Zombie::AnimateChewSound()
         {
             mApp->PlayFoley(FoleyType::FOLEY_CHOMP);
         }
+    }
+}
+
+void Zombie::Hypnotise()
+{
+    mApp->PlayFoley(FoleyType::FOLEY_FLOOP);
+
+    StartMindControlled();
+    mApp->AddTodParticle(mPosX + 60.0f, mPosY + 40.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_MIND_CONTROL);
+    TrySpawnLevelAward();
+
+    mVelX = 0.17f;
+    mAnimTicksPerFrame = 18;
+    UpdateAnimSpeed();
+
+    if (mZombieType == ZombieType::ZOMBIE_DANCER && !mApp->mPlayedQuickplay)
+    {
+        mApp->GetAchievement(AchievementType::ACHIEVEMENT_DISCO_IS_UNDEAD);
     }
 }
 
@@ -6911,6 +6916,39 @@ void Zombie::EatPlant(Plant* thePlant)
         thePlant->Die();
         mBoard->mChallenge->ZombieAtePlant(this, thePlant);
 
+        for (int i = 0; i < 50 && thePlant->mDeathEffect[i].mType != DEATHEFFECT_NULL; i++)
+        {
+            DeathEffect aCur = thePlant->mDeathEffect[i];
+            if (aCur.mType == DEATHEFFECT_HYPNOTISE && aCur.mAffectEater)
+            {
+                TakeDamage(aCur.mValue, 0U);
+                Hypnotise();
+            }
+            if (aCur.mType == DEATHEFFECT_FREEZE && aCur.mAffectEater)
+            {
+                ApplyFreezeValue(aCur.mValue * 100);
+            }
+            if (aCur.mType == DEATHEFFECT_CHILL && aCur.mAffectEater)
+            {
+                ApplyChillValue(aCur.mValue * 100);
+            }
+            if (aCur.mType == DEATHEFFECT_DAMAGE && aCur.mAffectEater)
+            {
+                TakeDamage(aCur.mValue, 0U);
+            }
+            if (aCur.mType == DEATHEFFECT_EXPLOSION && aCur.mAffectEater)
+            {
+                if (mBodyHealth <= aCur.mValue && aCur.mBurn)
+                {
+                    ApplyBurn();
+                }
+                else
+                {
+                    TakeDamage(aCur.mValue, 18U);
+                }
+            }
+        }
+
         if (mBoard->mLevel >= 2 && mBoard->mLevel <= 4 && mApp->IsFirstTimeAdventureMode())
         {
             if (thePlant->mPlantCol > 4 && mBoard->mPlants.mSize < 15 && thePlant->mSeedType == SeedType::SEED_PEASHOOTER)
@@ -7334,6 +7372,52 @@ void Zombie::ApplyChill(bool theIsIceTrap)
         aChillTime = 2000;
     }
     mChilledCounter = max(aChillTime, mChilledCounter);
+
+    UpdateAnimSpeed();
+}
+
+void Zombie::ApplyChillValue(int value)
+{
+    if (!CanBeChilled())
+        return;
+
+    if (mChilledCounter == 0)
+    {
+        mApp->PlayFoley(FoleyType::FOLEY_FROZEN);
+    }
+
+    int aChillTime = value;
+    mChilledCounter = max(aChillTime, mChilledCounter);
+
+    UpdateAnimSpeed();
+}
+
+void Zombie::ApplyFreezeValue(int value)
+{
+    bool cold = false;
+    if (mChilledCounter > 0 || mIceTrapCounter != 0)
+    {
+        cold = true;
+    }
+    if (mChilledCounter == 0)
+    {
+        mApp->PlayFoley(FoleyType::FOLEY_FROZEN);
+    }
+
+    if (!CanBeFrozen())
+        return;
+
+    mIceTrapCounter = value;
+
+    StopZombieSound();
+    if (mZombieType == ZombieType::ZOMBIE_BALLOON)
+    {
+        BalloonPropellerHatSpin(false);
+    }
+    if (mZombiePhase == ZombiePhase::PHASE_BOSS_HEAD_SPIT)
+    {
+        mBoard->RemoveParticleByType(ParticleEffect::PARTICLE_ZOMBIE_BOSS_FIREBALL);
+    }
 
     UpdateAnimSpeed();
 }
@@ -8186,7 +8270,7 @@ void Zombie::RemoveIceTrap()
     StartZombieSound();
 }
 
-void Zombie::HitIceTrap()
+void Zombie::HitIceTrap(int theDamage)
 {
     bool cold = false;
     if (mChilledCounter > 0 || mIceTrapCounter != 0)
@@ -8221,7 +8305,7 @@ void Zombie::HitIceTrap()
         mBoard->RemoveParticleByType(ParticleEffect::PARTICLE_ZOMBIE_BOSS_FIREBALL);
     }
 
-    TakeDamage(20, 1U);
+    TakeDamage(theDamage, 1U);
     UpdateAnimSpeed();
 }
 

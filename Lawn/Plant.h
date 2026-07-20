@@ -6,6 +6,8 @@
 #include "../DiscordRPC/rapidjson/document.h"
 #include "../DiscordRPC/rapidjson/filereadstream.h"
 
+#include "../Sexy.TodLib/TodCommon.h"
+
 #define MAX_MAGNET_ITEMS 5
 
 enum PlantSubClass
@@ -135,7 +137,44 @@ public:
     float                   mPosY;                          
     float                   mDestOffsetX;                   
     float                   mDestOffsetY;                   
-    MagnetItemType          mItemType;                      
+    MagnetItemType          mItemType;   
+};
+
+class ProjectileSpreadArray
+{
+public:
+    bool                    mNULL = 1;
+    int                     mProjectileType;
+    int                     mDamage;
+    float                   mAngle;
+    float                   mSpeed;
+
+    bool                    mRandomizeAngle = 0;
+    float                   mMinAngle;
+    float                   mMaxAngle;
+};
+
+enum DeathEffectType
+{
+    DEATHEFFECT_NULL = -1,
+    DEATHEFFECT_EXPLOSION,
+    DEATHEFFECT_HYPNOTISE,
+    DEATHEFFECT_DAMAGE,
+    DEATHEFFECT_CHILL,
+    DEATHEFFECT_FREEZE,
+    DEATHEFFECT_CREATESUN,
+};
+
+class DeathEffect
+{
+public:
+    DeathEffectType         mType = DEATHEFFECT_NULL;
+    float                   mValue;
+    float                   mAmount;
+    float                   mXRadius;
+    float                   mRowRange;
+    bool                    mAffectEater = false;
+    bool                    mBurn = true;
 };
 
 class Coin;
@@ -214,6 +253,19 @@ public:
     int                     mCrushedDamage;
     int                     mExplodedDamage;
     float                   mDamageReflectPercent;
+
+    TodProjectileWeightedArray  mProjectileWeightedArray[50];
+    TodProjectileWeightedArray* mProjectileArrayPick;
+
+    ProjectileSpreadArray   mProjectileSpreadArray[50];
+
+    bool                    mIsBiting;
+    float                   mSpeedMult;
+    Color                   mColorOverride;
+
+    int                     mExplosionRowRange;
+    float                   mExplosionXRadius;
+    DeathEffect             mDeathEffect[50];
 
 public:
     Plant();
@@ -321,9 +373,11 @@ public:
 
     void                    LoadJsonStats();
     void                    LoadJsonStat(const char* name, rapidjson::Document& doc, int* var, float mult = 1.0f);
+    void                    LoadJsonStatBool(const char* name, rapidjson::Document& doc, bool* var);
     void                    LoadJsonStatProjectile(const char* name, rapidjson::Document& doc, ProjectileType* var);
     void                    LoadJsonStatFloat(const char* name, rapidjson::Document& doc, float *var, float mult = 1.0f);
     void                    CreateSun(int amount, int value);
+    ProjectileType          GetProjectile(PlantWeapon thePlantWeapon = WEAPON_PRIMARY);
 };
 
 float                       PlantDrawHeightOffset(Board* theBoard, Plant* thePlant, SeedType theSeedType, int theCol, int theRow);
@@ -363,3 +417,5 @@ extern PlantProperty gPlantProps[SeedType::NUM_SEED_TYPES];
 
 /*inline*/ PlantDefinition& GetPlantDefinition(SeedType theSeedType);
 /*inline*/ PlantProperty& GetPlantProperty(SeedType theSeedType);
+
+int SpreadArrayLen(const ProjectileSpreadArray* theArray);

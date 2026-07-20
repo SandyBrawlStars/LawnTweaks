@@ -317,6 +317,22 @@ void JsonLoaderBoard()
 						else if (mPlantJson[gPlantDefs[i].mPlantName]["Recharge"].IsFloat())
 							gPlantDefs[i].mRefreshTime = mPlantJson[gPlantDefs[i].mPlantName]["Recharge"].GetFloat() * 100.0f;
 					}
+					if (mPlantJson[gPlantDefs[i].mPlantName].HasMember("Subclass") && mPlantJson[gPlantDefs[i].mPlantName]["Subclass"].IsString())
+					{
+						const char* str = mPlantJson[gPlantDefs[i].mPlantName]["Subclass"].GetString();
+						if (StringToSexyString(str) == _S("Shooter"))
+						{
+							gPlantDefs[i].mSubClass = SUBCLASS_SHOOTER;
+						}
+						else if (StringToSexyString(str) == _S("Producer"))
+						{
+							gPlantDefs[i].mSubClass = SUBCLASS_SUNPRODUCER;
+						}
+						else if (StringToSexyString(str) == _S("Normal"))
+						{
+							gPlantDefs[i].mSubClass = SUBCLASS_NORMAL;
+						}
+					}
 				}
 			}
 		}
@@ -436,7 +452,7 @@ bool Board::LoadGame(const string& theFileName)
 	LoadBackgroundImages();
 	mApp->ClearUpdateBacklog();
 	ResetFPSStats();
-	UpdateLayers();		
+	UpdateLayers();
 	if (mApp->mGameScene == GameScenes::SCENE_PLAYING)
 		mFastButton->mBtnNoDraw = false;
 	return true;

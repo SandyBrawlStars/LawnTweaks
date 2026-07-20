@@ -1555,7 +1555,7 @@ void CutScene::AdvanceCrazyDaveDialog(bool theJustSkipping)
 	{
 		int aCost = StoreScreen::GetItemCost(StoreItem::STORE_ITEM_PACKET_UPGRADE);
 		int aNumPackets = mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_PACKET_UPGRADE];
-		SexyString aBodyString = TodReplaceNumberString(_S("[UPGRADE_DIALOG_BODY]"), _S("{SLOTS}"), aNumPackets + 1);
+		SexyString aBodyString = TodReplaceNumberString(_S("[UPGRADE_DIALOG_BODY]"), _S("{SLOTS}"), aNumPackets + 1 + 6);
 		SexyString aAmountString = mApp->GetMoneyString(mApp->mPlayerInfo->mCoins);
 		Dialog* aDialog = mApp->DoDialog(Dialogs::DIALOG_PURCHASE_PACKET_SLOT, true, aAmountString, aBodyString, _S(""), Dialog::BUTTONS_YES_NO);
 		aDialog->mX += 120;

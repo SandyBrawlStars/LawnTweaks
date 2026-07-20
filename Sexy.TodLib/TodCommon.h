@@ -26,6 +26,13 @@ struct TodWeightedArray
 	int mWeight;
 };
 
+struct TodProjectileWeightedArray
+{
+	int mType;
+	int mDamage;
+	int mWeight;
+};
+
 struct TodWeightedGridArray
 {
 	int mX;
@@ -49,6 +56,10 @@ TodWeightedGridArray*	TodPickFromWeightedGridArray(const TodWeightedGridArray* t
 float					TodCalcSmoothWeight(float aWeight, float aLastPicked, float aSecondLastPicked);
 void					TodUpdateSmoothArrayPick(TodSmoothArray* theArray, int theCount, int thePickIndex);
 int						TodPickFromSmoothArray(TodSmoothArray* theArray, int theCount);
+
+int						TodPickFromWeightedArrayProjectile(const TodProjectileWeightedArray* theArray, int theCount);
+const TodProjectileWeightedArray* TodPickArrayItemFromWeightedArrayProjectile(const TodProjectileWeightedArray* theArray, int theCount);
+int	TodArrayLength(const TodProjectileWeightedArray* theArray);
 
 // #################################################################################################### //
 
